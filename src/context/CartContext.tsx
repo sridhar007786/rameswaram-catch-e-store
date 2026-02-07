@@ -96,7 +96,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
   };
 
   // Save to localStorage
-  localStorage.setItem('autokaaran-cart', JSON.stringify(newItems));
+  localStorage.setItem('meenava-cart', JSON.stringify(newItems));
 
   return newState;
 };
@@ -110,7 +110,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('autokaaran-cart');
+    const savedCart = localStorage.getItem('meenava-cart');
     if (savedCart) {
       try {
         const items = JSON.parse(savedCart);

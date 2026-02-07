@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Phone, Search } from 'lucide-react';
+import { Menu, X, ShoppingCart, Phone, Search, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 const navLinks = [
@@ -16,6 +17,7 @@ export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { state } = useCart();
+  const { user, isAdmin } = useAuth();
 
   const isHome = location.pathname === '/';
 
@@ -35,7 +37,7 @@ export const Header = () => {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-white font-display text-xl font-bold leading-tight">
-                AutoKaaran
+                Meenava Sonthangal
               </h1>
               <p className="text-white/70 text-xs">Rameswaram Seafoods</p>
             </div>
@@ -60,6 +62,14 @@ export const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Link to="/admin">
+                <Button variant="glass" size="icon" className="hidden md:flex">
+                  <Shield className="h-5 w-5" />
+                </Button>
+              </Link>
+            )}
+
             <Button variant="glass" size="icon" className="hidden md:flex">
               <Search className="h-5 w-5" />
             </Button>

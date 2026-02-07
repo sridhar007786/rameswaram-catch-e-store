@@ -130,7 +130,7 @@ const ContactPage = () => {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="AutoKaaran Seafoods Location"
+                title="Meenava Sonthangal Location"
               />
             </div>
           </div>
