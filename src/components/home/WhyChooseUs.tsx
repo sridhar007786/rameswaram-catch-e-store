@@ -38,7 +38,7 @@ export const WhyChooseUs = () => {
         {/* Section header */}
         <div className="text-center mb-16">
           <h2 className="section-title text-foreground mb-4">
-            Why Choose AutoKaaran?
+            Why Choose Meenava Sonthangal?
           </h2>
           <p className="section-subtitle">
             We're not just selling seafood — we're delivering the authentic taste of 

@@ -16,7 +16,7 @@ export const Footer = () => {
                 🐟
               </div>
               <div>
-                <h3 className="font-display text-xl font-bold">AutoKaaran</h3>
+                <h3 className="font-display text-xl font-bold">Meenava Sonthangal</h3>
                 <p className="text-white/70 text-sm">Rameswaram Seafoods</p>
               </div>
             </div>
@@ -129,7 +129,7 @@ export const Footer = () => {
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-white/50 text-sm">
-            © 2024 AutoKaaran Seafoods. All rights reserved.
+            © 2024 Meenava Sonthangal. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link to="/privacy" className="text-white/50 hover:text-white text-sm transition-colors">
