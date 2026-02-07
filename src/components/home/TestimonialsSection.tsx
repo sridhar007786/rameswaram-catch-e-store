@@ -12,7 +12,7 @@ const testimonials = [
     name: 'Rajesh Kumar',
     location: 'Madurai',
     rating: 5,
-    text: 'Best dry fish I\'ve ever had! The traditional sun-drying method really makes a difference. Authentic Rameswaram taste.',
+    text: 'Best dry fish I\'ve ever had! The traditional sun-drying method really makes a difference. Authentic Kanyakumari taste.',
     avatar: '👨',
   },
   {
