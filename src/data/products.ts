@@ -15,7 +15,7 @@ export const categories: Category[] = [
     name: 'Fresh Fish',
     nameTamil: 'புதிய மீன்',
     icon: '🐟',
-    description: 'Caught fresh daily from Rameswaram waters',
+    description: 'Caught fresh daily from Kanyakumari waters',
   },
   {
     id: 'dry-fish',
@@ -38,7 +38,7 @@ export const products: Product[] = [
     id: '1',
     name: 'Red Snapper',
     nameTamil: 'சங்கரா மீன்',
-    description: 'Fresh Red Snapper caught daily from the pristine waters of Rameswaram. Perfect for frying or curry.',
+    description: 'Fresh Red Snapper caught daily from the pristine waters of Kanyakumari. Perfect for frying or curry.',
     category: 'fresh-fish',
     image: freshSnapper,
     prices: [
@@ -74,7 +74,7 @@ export const products: Product[] = [
     id: '3',
     name: 'Dry Anchovies',
     nameTamil: 'நெத்திலி கருவாடு',
-    description: 'Traditional sun-dried anchovies from Rameswaram. Rich in flavor, perfect for chutneys and fry dishes.',
+    description: 'Traditional sun-dried anchovies from Kanyakumari. Rich in flavor, perfect for chutneys and fry dishes.',
     category: 'dry-fish',
     image: dryFish,
     prices: [

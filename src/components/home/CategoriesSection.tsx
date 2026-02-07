@@ -12,7 +12,7 @@ export const CategoriesSection = () => {
           </h2>
           <p className="section-subtitle">
             From fresh catches to traditional dried fish, discover the finest seafood 
-            from the shores of Rameswaram.
+            from the shores of Kanyakumari.
           </p>
         </div>
 

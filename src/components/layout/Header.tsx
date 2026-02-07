@@ -39,7 +39,7 @@ export const Header = () => {
               <h1 className="text-white font-display text-xl font-bold leading-tight">
                 Meenava Sonthangal
               </h1>
-              <p className="text-white/70 text-xs">Rameswaram Seafoods</p>
+              <p className="text-white/70 text-xs">Kanyakumari Seafoods</p>
             </div>
           </Link>
 
