@@ -17,11 +17,11 @@ export const Footer = () => {
               </div>
               <div>
                 <h3 className="font-display text-xl font-bold">Meenava Sonthangal</h3>
-                <p className="text-white/70 text-sm">Rameswaram Seafoods</p>
+                <p className="text-white/70 text-sm">Kanyakumari Seafoods</p>
               </div>
             </div>
             <p className="text-white/70 text-sm leading-relaxed">
-              Fresh seafood delivered straight from the pristine waters of Rameswaram. 
+              Fresh seafood delivered straight from the pristine waters of Kanyakumari. 
               Quality and freshness guaranteed since 2018.
             </p>
             <div className="flex gap-3">
@@ -101,7 +101,7 @@ export const Footer = () => {
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
                 <span className="text-white/70 text-sm">
-                  Fishing Harbour Road, Rameswaram, Tamil Nadu 623526
+                  Beach Road, Kanyakumari, Tamil Nadu 629702
                 </span>
               </li>
               <li>
@@ -115,11 +115,11 @@ export const Footer = () => {
               </li>
               <li>
                 <a
-                  href="mailto:order@autokaaranseafoods.com"
+                  href="mailto:order@meenavasonthangal.com"
                   className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
                 >
                   <Mail className="h-5 w-5 text-secondary" />
-                  <span className="text-sm">order@autokaaranseafoods.com</span>
+                  <span className="text-sm">order@meenavasonthangal.com</span>
                 </a>
               </li>
             </ul>

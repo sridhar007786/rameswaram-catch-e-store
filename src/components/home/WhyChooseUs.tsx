@@ -5,7 +5,7 @@ const features = [
     icon: Anchor,
     title: 'Direct from Fishermen',
     titleTamil: 'மீனவர்களிடம் நேரடியாக',
-    description: 'We partner directly with local fishermen in Rameswaram, ensuring you get the freshest catch at the best prices.',
+    description: 'We partner directly with local fishermen in Kanyakumari, ensuring you get the freshest catch at the best prices.',
   },
   {
     icon: Waves,
@@ -42,7 +42,7 @@ export const WhyChooseUs = () => {
           </h2>
           <p className="section-subtitle">
             We're not just selling seafood — we're delivering the authentic taste of 
-            Rameswaram's ocean heritage to your table.
+            Kanyakumari's ocean heritage to your table.
           </p>
         </div>
 

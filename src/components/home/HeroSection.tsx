@@ -21,7 +21,7 @@ export const HeroSection = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 animate-fade-up">
             <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" />
-            <span className="text-sm font-medium">Direct from Rameswaram Fishermen</span>
+            <span className="text-sm font-medium">Direct from Kanyakumari Fishermen</span>
           </div>
 
           {/* Main heading */}
@@ -33,7 +33,7 @@ export const HeroSection = () => {
           {/* Subheading */}
           <p className="hero-subtitle animate-fade-up max-w-2xl mx-auto" style={{ animationDelay: '0.2s' }}>
             Experience the taste of the ocean with our premium seafood, caught fresh daily 
-            and delivered to your doorstep with guaranteed freshness.
+            and delivered to your doorstep with guaranteed freshness. From the shores of Kanyakumari!
           </p>
 
           {/* CTA Buttons */}

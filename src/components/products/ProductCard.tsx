@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Star, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,7 @@ export const ProductCard = ({ product, onViewDetails }: ProductCardProps) => {
   const [selectedPriceIndex, setSelectedPriceIndex] = useState(0);
   const { addItem } = useCart();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const selectedPrice = product.prices[selectedPriceIndex];
 
@@ -34,7 +36,7 @@ export const ProductCard = ({ product, onViewDetails }: ProductCardProps) => {
   return (
     <div
       className="product-card group cursor-pointer"
-      onClick={() => onViewDetails?.(product)}
+      onClick={() => navigate(`/products/${product.id}`)}
     >
       {/* Image container */}
       <div className="relative aspect-square overflow-hidden bg-muted">

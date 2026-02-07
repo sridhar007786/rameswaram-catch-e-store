@@ -16,7 +16,7 @@ export const CTASection = () => {
               Ready to Taste the Ocean?
             </h2>
             <p className="text-white/80 text-lg max-w-2xl mx-auto mb-8">
-              Order now and experience the freshest seafood from Rameswaram. 
+              Order now and experience the freshest seafood from Kanyakumari. 
               Free delivery on orders above ₹500!
             </p>
 

@@ -150,9 +150,11 @@ const CartPage = () => {
                   </div>
                 </div>
 
-                <Button variant="cta" size="lg" className="w-full mb-3">
-                  Proceed to Checkout
-                </Button>
+                <Link to="/checkout">
+                  <Button variant="cta" size="lg" className="w-full mb-3">
+                    Proceed to Checkout
+                  </Button>
+                </Link>
 
                 <a
                   href={`https://wa.me/919876543210?text=${encodeURIComponent(
