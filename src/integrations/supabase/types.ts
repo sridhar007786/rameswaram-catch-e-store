@@ -78,6 +78,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          images: string[] | null
           in_stock: boolean
           is_fresh: boolean | null
           is_popular: boolean | null
@@ -94,6 +95,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          images?: string[] | null
           in_stock?: boolean
           is_fresh?: boolean | null
           is_popular?: boolean | null
@@ -110,6 +112,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          images?: string[] | null
           in_stock?: boolean
           is_fresh?: boolean | null
           is_popular?: boolean | null
