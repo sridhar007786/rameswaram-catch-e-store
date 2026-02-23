@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, LogOut, Fish, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, LogOut, Fish, Menu, X, BarChart3, Users, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,9 @@ const navItems = [
   { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
   { name: 'Products', path: '/admin/products', icon: Package },
   { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
+  { name: 'Sales Report', path: '/admin/sales', icon: BarChart3 },
+  { name: 'Customers', path: '/admin/customers', icon: Users },
+  { name: 'Staff', path: '/admin/staff', icon: Shield },
 ];
 
 export const AdminLayout = ({ children }: { children: ReactNode }) => {
