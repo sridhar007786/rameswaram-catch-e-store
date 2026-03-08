@@ -137,6 +137,10 @@ const CheckoutPage = () => {
         payment_status: 'pending', notes: form.notes || null,
       } as any).select().single();
       if (error) throw error;
+      // Increment coupon usage
+      if (appliedCoupon) {
+        await supabase.rpc('increment_coupon_usage' as any, { coupon_code: appliedCoupon });
+      }
       clearCart();
       setOrderId(data.id);
       setOrderPlaced(true);
