@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Search, Eye, X, Phone, Mail, MapPin, ShoppingCart } from 'lucide-react';
+import { Users, Search, Eye, X, Phone, Mail, MapPin, ShoppingCart, Download } from 'lucide-react';
 
 interface Customer {
   name: string;
@@ -24,9 +24,7 @@ const CustomerManagement = () => {
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Customer | null>(null);
 
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
+  useEffect(() => { fetchCustomers(); }, []);
 
   const fetchCustomers = async () => {
     const { data: orders } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
@@ -36,23 +34,12 @@ const CustomerManagement = () => {
     orders.forEach((o: any) => {
       const key = o.customer_phone;
       if (!map[key]) {
-        map[key] = {
-          name: o.customer_name,
-          phone: o.customer_phone,
-          email: o.customer_email,
-          addresses: [],
-          orders: [],
-          totalSpent: 0,
-          orderCount: 0,
-          lastOrder: o.created_at,
-        };
+        map[key] = { name: o.customer_name, phone: o.customer_phone, email: o.customer_email, addresses: [], orders: [], totalSpent: 0, orderCount: 0, lastOrder: o.created_at };
       }
       map[key].orders.push(o);
       map[key].totalSpent += Number(o.total || 0);
       map[key].orderCount += 1;
-      if (o.delivery_address && !map[key].addresses.includes(o.delivery_address)) {
-        map[key].addresses.push(o.delivery_address);
-      }
+      if (o.delivery_address && !map[key].addresses.includes(o.delivery_address)) map[key].addresses.push(o.delivery_address);
       if (!map[key].email && o.customer_email) map[key].email = o.customer_email;
     });
 
@@ -66,14 +53,27 @@ const CustomerManagement = () => {
     (c.email && c.email.toLowerCase().includes(search.toLowerCase()))
   );
 
+  const downloadCustomersCSV = () => {
+    const headers = ['Name', 'Phone', 'Email', 'Total Orders', 'Total Spent', 'Last Order', 'Addresses'];
+    const rows = filtered.map(c => [
+      c.name, c.phone, c.email || '', c.orderCount, `₹${c.totalSpent.toLocaleString()}`,
+      new Date(c.lastOrder).toLocaleDateString(), c.addresses.join(' | '),
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `customers-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const statusBadge = (status: string) => {
     const styles: Record<string, string> = {
-      pending: 'bg-amber-100 text-amber-800',
-      confirmed: 'bg-blue-100 text-blue-800',
-      packed: 'bg-purple-100 text-purple-800',
-      shipped: 'bg-indigo-100 text-indigo-800',
-      delivered: 'bg-green-100 text-green-800',
-      cancelled: 'bg-red-100 text-red-800',
+      pending: 'bg-amber-100 text-amber-800', confirmed: 'bg-blue-100 text-blue-800',
+      packed: 'bg-purple-100 text-purple-800', shipped: 'bg-indigo-100 text-indigo-800',
+      delivered: 'bg-green-100 text-green-800', cancelled: 'bg-red-100 text-red-800',
     };
     return <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${styles[status] || 'bg-muted'}`}>{status}</span>;
   };
@@ -83,9 +83,14 @@ const CustomerManagement = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <h2 className="font-display text-2xl font-bold text-foreground">Customer Management</h2>
-          <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search by name, phone, email..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+          <div className="flex gap-2 items-center">
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search by name, phone, email..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+            </div>
+            <Button variant="outline" size="sm" className="gap-1.5 shrink-0" onClick={downloadCustomersCSV}>
+              <Download className="h-4 w-4" /> Export
+            </Button>
           </div>
         </div>
 
@@ -100,24 +105,30 @@ const CustomerManagement = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Name</p>
-                    <p className="font-medium">{selected.name}</p>
-                  </div>
+                  <div><p className="text-xs text-muted-foreground">Name</p><p className="font-medium">{selected.name}</p></div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Phone</p>
-                    <p className="font-medium">{selected.phone}</p>
-                  </div>
+                  <div><p className="text-xs text-muted-foreground">Phone</p><p className="font-medium">{selected.phone}</p></div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  <div>
-                    <p className="text-xs text-muted-foreground">Email</p>
-                    <p className="font-medium">{selected.email || 'N/A'}</p>
-                  </div>
+                  <div><p className="text-xs text-muted-foreground">Email</p><p className="font-medium">{selected.email || 'N/A'}</p></div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-muted/30 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-foreground">{selected.orderCount}</p>
+                  <p className="text-xs text-muted-foreground">Total Orders</p>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-foreground">₹{selected.totalSpent.toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Total Spent</p>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3 text-center">
+                  <p className="text-2xl font-bold text-foreground">₹{Math.round(selected.totalSpent / selected.orderCount).toLocaleString()}</p>
+                  <p className="text-xs text-muted-foreground">Avg Order</p>
                 </div>
               </div>
 
@@ -192,15 +203,11 @@ const CustomerManagement = () => {
                           {c.email && <p className="text-xs text-muted-foreground">{c.email}</p>}
                         </td>
                         <td className="py-3 px-4">{c.phone}</td>
-                        <td className="py-3 px-4">
-                          <Badge variant="outline">{c.orderCount}</Badge>
-                        </td>
+                        <td className="py-3 px-4"><Badge variant="outline">{c.orderCount}</Badge></td>
                         <td className="py-3 px-4 font-semibold">₹{c.totalSpent.toLocaleString()}</td>
                         <td className="py-3 px-4 text-muted-foreground">{new Date(c.lastOrder).toLocaleDateString()}</td>
                         <td className="py-3 px-4 text-right">
-                          <Button variant="ghost" size="icon" onClick={() => setSelected(c)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => setSelected(c)}><Eye className="h-4 w-4" /></Button>
                         </td>
                       </tr>
                     ))}
