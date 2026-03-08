@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ShoppingCart, Eye, X, MessageCircle, FileDown, Printer, CalendarDays } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { sendOrderConfirmation, sendStatusUpdate } from '@/utils/whatsapp';
 import { generateOrderPDF } from '@/utils/pdf';
 import { generateDeliveryLabelsPDF } from '@/utils/deliveryLabels';
