@@ -294,6 +294,9 @@ const OrdersManagement = () => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/50">
+                      <th className="py-3 px-4 w-10">
+                        <Checkbox checked={filteredOrders.length > 0 && selectedIds.size === filteredOrders.length} onCheckedChange={toggleSelectAll} />
+                      </th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Order ID</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Customer</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Phone</th>
