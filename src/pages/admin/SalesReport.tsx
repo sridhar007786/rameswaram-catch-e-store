@@ -146,9 +146,11 @@ const SalesReport = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { title: 'Total Revenue', value: `₹${totalRevenue.toLocaleString()}`, icon: IndianRupee, color: 'text-green-600' },
-                { title: 'Total Orders', value: totalOrders, icon: TrendingUp, color: 'text-primary' },
+                { title: 'Total Cost', value: `₹${Math.round(totalCost).toLocaleString()}`, icon: IndianRupee, color: 'text-destructive' },
+                { title: 'Total Profit', value: `₹${Math.round(totalProfit).toLocaleString()}`, icon: TrendingUp, color: totalProfit >= 0 ? 'text-green-600' : 'text-destructive' },
+                { title: 'Profit Margin', value: `${profitMargin.toFixed(1)}%`, icon: TrendingUp, color: profitMargin >= 20 ? 'text-green-600' : 'text-amber-500' },
+                { title: 'Total Orders', value: totalOrders, icon: Calendar, color: 'text-primary' },
                 { title: 'Avg Order Value', value: `₹${Math.round(avgOrderValue).toLocaleString()}`, icon: Calendar, color: 'text-accent' },
-                { title: 'Delivered', value: deliveredOrders, icon: TrendingUp, color: 'text-green-600' },
               ].map(c => (
                 <Card key={c.title}>
                   <CardContent className="p-4 sm:p-6">
