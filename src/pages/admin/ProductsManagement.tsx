@@ -445,6 +445,8 @@ const ProductsManagement = () => {
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Category</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Images</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Price Range</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Cost</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Margin</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Stock</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
                       <th className="text-right py-3 px-4 font-medium text-muted-foreground">Actions</th>
