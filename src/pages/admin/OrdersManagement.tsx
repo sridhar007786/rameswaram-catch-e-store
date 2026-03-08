@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Eye, X, MessageCircle, FileDown, Printer, CalendarDays } from 'lucide-react';
+import { ShoppingCart, Eye, MessageCircle, FileDown, Printer, CalendarDays, Download, Clock, Package, Truck, CheckCircle2, XCircle, User, Phone, Mail, MapPin, CreditCard, StickyNote } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { sendOrderConfirmation, sendStatusUpdate } from '@/utils/whatsapp';
 import { generateOrderPDF } from '@/utils/pdf';
@@ -22,11 +23,21 @@ const statusStyles: Record<string, string> = {
   cancelled: 'bg-red-100 text-red-800',
 };
 
+const statusIcons: Record<string, any> = {
+  pending: Clock,
+  confirmed: CheckCircle2,
+  packed: Package,
+  shipped: Truck,
+  delivered: CheckCircle2,
+  cancelled: XCircle,
+};
+
 const OrdersManagement = () => {
   const { toast } = useToast();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [orderTracking, setOrderTracking] = useState<any[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
   const [customDate, setCustomDate] = useState<string>('');
@@ -82,6 +93,20 @@ const OrdersManagement = () => {
     setLoading(false);
   };
 
+  const fetchOrderTracking = async (orderId: string) => {
+    const { data } = await supabase
+      .from('order_tracking')
+      .select('*')
+      .eq('order_id', orderId)
+      .order('created_at', { ascending: true });
+    setOrderTracking(data || []);
+  };
+
+  const openOrderDetail = (order: any) => {
+    setSelectedOrder(order);
+    fetchOrderTracking(order.id);
+  };
+
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     const order = orders.find(o => o.id === orderId);
     const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
@@ -89,7 +114,12 @@ const OrdersManagement = () => {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
       toast({ title: 'Updated', description: `Order status changed to ${newStatus}.` });
-      if (selectedOrder?.id === orderId) setSelectedOrder({ ...selectedOrder, status: newStatus });
+      // Add tracking entry
+      await supabase.from('order_tracking').insert({ order_id: orderId, status: newStatus, note: `Status changed to ${newStatus}` });
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder({ ...selectedOrder, status: newStatus });
+        fetchOrderTracking(orderId);
+      }
       if (order && ['confirmed', 'packed', 'shipped', 'delivered'].includes(newStatus)) {
         sendStatusUpdate({ id: orderId, customerName: order.customer_name, customerPhone: order.customer_phone, status: newStatus, total: Number(order.total) });
       }
@@ -153,6 +183,24 @@ const OrdersManagement = () => {
     );
   };
 
+  const downloadOrdersCSV = () => {
+    const headers = ['Order ID', 'Date', 'Customer', 'Phone', 'Email', 'Address', 'Items', 'Subtotal', 'Delivery', 'Total', 'Status', 'Payment Method', 'Payment Status'];
+    const rows = filteredOrders.map(o => [
+      o.id, new Date(o.created_at).toLocaleDateString(), o.customer_name, o.customer_phone,
+      o.customer_email || '', o.delivery_address,
+      ((o.items as any[]) || []).map((i: any) => `${i.name} x${i.quantity}`).join('; '),
+      o.subtotal, o.delivery_charge, o.total, o.status, o.payment_method || 'cod', o.payment_status || 'pending',
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const todayCount = orders.filter(o => isToday(o.created_at)).length;
 
   return (
@@ -169,6 +217,9 @@ const OrdersManagement = () => {
               )}
               <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownloadAllLabels}>
                 <Printer className="h-4 w-4" /> All Labels ({filteredOrders.length})
+              </Button>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={downloadOrdersCSV}>
+                <Download className="h-4 w-4" /> Export CSV
               </Button>
             </div>
           </div>
@@ -212,43 +263,171 @@ const OrdersManagement = () => {
           </div>
         </div>
 
-        {/* Order detail modal */}
-        {selectedOrder && (
-          <Card className="border-2 border-primary/20">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">Order Details</CardTitle>
-              <Button variant="ghost" size="icon" onClick={() => setSelectedOrder(null)}><X className="h-4 w-4" /></Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div><p className="text-sm text-muted-foreground">Customer</p><p className="font-medium">{selectedOrder.customer_name}</p></div>
-                <div><p className="text-sm text-muted-foreground">Phone</p><p className="font-medium">{selectedOrder.customer_phone}</p></div>
-                <div><p className="text-sm text-muted-foreground">Email</p><p className="font-medium">{selectedOrder.customer_email || 'N/A'}</p></div>
-                <div><p className="text-sm text-muted-foreground">Delivery Address</p><p className="font-medium">{selectedOrder.delivery_address}</p></div>
-                <div><p className="text-sm text-muted-foreground">Payment Method</p><p className="font-medium capitalize">{selectedOrder.payment_method}</p></div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Payment Status</p>
-                  <Badge variant={selectedOrder.payment_status === 'paid' ? 'default' : 'outline'} className="capitalize">{selectedOrder.payment_status}</Badge>
-                </div>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">Items</p>
-                <div className="bg-muted/50 rounded-lg p-3 space-y-2">
-                  {(selectedOrder.items as any[])?.map((item: any, i: number) => (
-                    <div key={i} className="flex justify-between text-sm">
-                      <span>{item.name} ({item.weight}) x{item.quantity}</span>
-                      <span className="font-medium">₹{item.price * item.quantity}</span>
+        {/* Order Detail Dialog */}
+        <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                Order Details
+                <Badge className={`ml-2 capitalize ${statusStyles[selectedOrder?.status] || ''}`}>
+                  {selectedOrder?.status}
+                </Badge>
+              </DialogTitle>
+            </DialogHeader>
+            {selectedOrder && (
+              <div className="space-y-6">
+                {/* Customer Info */}
+                <div className="bg-muted/30 rounded-xl p-4 space-y-3">
+                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Customer Information</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Name</p>
+                        <p className="font-medium text-sm">{selectedOrder.customer_name}</p>
+                      </div>
                     </div>
-                  )) || <p className="text-sm text-muted-foreground">No items data</p>}
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Phone</p>
+                        <p className="font-medium text-sm">{selectedOrder.customer_phone}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Email</p>
+                        <p className="font-medium text-sm">{selectedOrder.customer_email || 'N/A'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Address</p>
+                        <p className="font-medium text-sm">{selectedOrder.delivery_address}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+
+                {/* Items Breakdown */}
                 <div>
-                  <p className="text-sm text-muted-foreground">Subtotal: ₹{Number(selectedOrder.subtotal).toLocaleString()}</p>
-                  <p className="text-sm text-muted-foreground">Delivery: ₹{Number(selectedOrder.delivery_charge).toLocaleString()}</p>
-                  <p className="font-bold text-lg">Total: ₹{Number(selectedOrder.total).toLocaleString()}</p>
+                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">Items Ordered</h4>
+                  <div className="border border-border rounded-xl overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-muted/50">
+                          <th className="text-left py-2 px-3 font-medium text-muted-foreground">Item</th>
+                          <th className="text-center py-2 px-3 font-medium text-muted-foreground">Weight</th>
+                          <th className="text-center py-2 px-3 font-medium text-muted-foreground">Qty</th>
+                          <th className="text-right py-2 px-3 font-medium text-muted-foreground">Price</th>
+                          <th className="text-right py-2 px-3 font-medium text-muted-foreground">Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(selectedOrder.items as any[])?.map((item: any, i: number) => (
+                          <tr key={i} className="border-t border-border">
+                            <td className="py-2 px-3 font-medium">{item.name}</td>
+                            <td className="py-2 px-3 text-center text-muted-foreground">{item.weight || '-'}</td>
+                            <td className="py-2 px-3 text-center">{item.quantity}</td>
+                            <td className="py-2 px-3 text-right text-muted-foreground">₹{item.price}</td>
+                            <td className="py-2 px-3 text-right font-semibold">₹{item.price * item.quantity}</td>
+                          </tr>
+                        )) || <tr><td colSpan={5} className="py-4 text-center text-muted-foreground">No items data</td></tr>}
+                      </tbody>
+                      <tfoot className="bg-muted/30">
+                        <tr className="border-t border-border">
+                          <td colSpan={4} className="py-2 px-3 text-right text-muted-foreground">Subtotal</td>
+                          <td className="py-2 px-3 text-right font-medium">₹{Number(selectedOrder.subtotal).toLocaleString()}</td>
+                        </tr>
+                        <tr>
+                          <td colSpan={4} className="py-2 px-3 text-right text-muted-foreground">Delivery</td>
+                          <td className="py-2 px-3 text-right font-medium">₹{Number(selectedOrder.delivery_charge).toLocaleString()}</td>
+                        </tr>
+                        <tr className="border-t border-border">
+                          <td colSpan={4} className="py-2 px-3 text-right font-bold text-base">Grand Total</td>
+                          <td className="py-2 px-3 text-right font-bold text-base text-primary">₹{Number(selectedOrder.total).toLocaleString()}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+
+                {/* Payment & Notes */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2 bg-muted/30 rounded-lg p-3">
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Payment</p>
+                      <p className="font-medium text-sm capitalize">{selectedOrder.payment_method || 'COD'} · <Badge variant={selectedOrder.payment_status === 'paid' ? 'default' : 'outline'} className="text-xs capitalize">{selectedOrder.payment_status}</Badge></p>
+                    </div>
+                  </div>
+                  {selectedOrder.notes && (
+                    <div className="flex items-start gap-2 bg-muted/30 rounded-lg p-3">
+                      <StickyNote className="h-4 w-4 text-muted-foreground mt-0.5" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Notes</p>
+                        <p className="text-sm">{selectedOrder.notes}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Order Timeline */}
+                <div>
+                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">Order Timeline</h4>
+                  <div className="space-y-0">
+                    {/* Created entry */}
+                    <div className="flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Clock className="h-4 w-4 text-primary" />
+                        </div>
+                        {orderTracking.length > 0 && <div className="w-0.5 flex-1 bg-border" />}
+                      </div>
+                      <div className="pb-4">
+                        <p className="font-medium text-sm">Order Placed</p>
+                        <p className="text-xs text-muted-foreground">{new Date(selectedOrder.created_at).toLocaleString()}</p>
+                      </div>
+                    </div>
+                    {/* Tracking entries */}
+                    {orderTracking.map((t, i) => {
+                      const Icon = statusIcons[t.status] || Clock;
+                      return (
+                        <div key={t.id} className="flex gap-3">
+                          <div className="flex flex-col items-center">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                              t.status === 'cancelled' ? 'bg-destructive/10' : 
+                              t.status === 'delivered' ? 'bg-green-100' : 'bg-muted'
+                            }`}>
+                              <Icon className={`h-4 w-4 ${
+                                t.status === 'cancelled' ? 'text-destructive' :
+                                t.status === 'delivered' ? 'text-green-600' : 'text-muted-foreground'
+                              }`} />
+                            </div>
+                            {i < orderTracking.length - 1 && <div className="w-0.5 flex-1 bg-border" />}
+                          </div>
+                          <div className="pb-4">
+                            <p className="font-medium text-sm capitalize">{t.status}</p>
+                            {t.note && <p className="text-xs text-muted-foreground">{t.note}</p>}
+                            <p className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString()}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
+                  <select
+                    className="px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm"
+                    value={selectedOrder.status}
+                    onChange={(e) => updateOrderStatus(selectedOrder.id, e.target.value)}
+                  >
+                    {ORDER_STATUSES.map((s) => <option key={s} value={s} className="capitalize">{s}</option>)}
+                  </select>
                   <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleWhatsAppConfirmation(selectedOrder)}>
                     <MessageCircle className="h-4 w-4" /> WhatsApp
                   </Button>
@@ -262,21 +441,11 @@ const OrdersManagement = () => {
                   }])}>
                     <Printer className="h-4 w-4" /> Label
                   </Button>
-                  <select
-                    className="px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm"
-                    value={selectedOrder.status}
-                    onChange={(e) => updateOrderStatus(selectedOrder.id, e.target.value)}
-                  >
-                    {ORDER_STATUSES.map((s) => <option key={s} value={s} className="capitalize">{s}</option>)}
-                  </select>
                 </div>
               </div>
-              {selectedOrder.notes && (
-                <div><p className="text-sm text-muted-foreground">Notes</p><p className="text-sm">{selectedOrder.notes}</p></div>
-              )}
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Orders table */}
         <Card>
@@ -310,8 +479,9 @@ const OrdersManagement = () => {
                   </thead>
                   <tbody>
                     {filteredOrders.map((order: any) => (
-                      <tr key={order.id} className={`border-b last:border-0 hover:bg-muted/30 ${selectedIds.has(order.id) ? 'bg-primary/5' : ''}`}>
-                        <td className="py-3 px-4">
+                      <tr key={order.id} className={`border-b last:border-0 hover:bg-muted/30 cursor-pointer ${selectedIds.has(order.id) ? 'bg-primary/5' : ''}`}
+                        onClick={() => openOrderDetail(order)}>
+                        <td className="py-3 px-4" onClick={e => e.stopPropagation()}>
                           <Checkbox checked={selectedIds.has(order.id)} onCheckedChange={() => toggleSelect(order.id)} />
                         </td>
                         <td className="py-3 px-4 font-mono text-xs">{order.id.slice(0, 8)}...</td>
@@ -321,7 +491,7 @@ const OrdersManagement = () => {
                           {(order.items as any[])?.map((i: any) => `${i.name} x${i.quantity}`).join(', ') || '—'}
                         </td>
                         <td className="py-3 px-4 font-semibold">₹{Number(order.total).toLocaleString()}</td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4" onClick={e => e.stopPropagation()}>
                           <select
                             className={`px-2 py-1 rounded-full text-xs font-medium border-0 cursor-pointer ${statusStyles[order.status] || 'bg-muted'}`}
                             value={order.status}
@@ -331,8 +501,8 @@ const OrdersManagement = () => {
                           </select>
                         </td>
                         <td className="py-3 px-4 text-muted-foreground">{new Date(order.created_at).toLocaleDateString()}</td>
-                        <td className="py-3 px-4 text-right space-x-1">
-                          <Button variant="ghost" size="icon" onClick={() => setSelectedOrder(order)}><Eye className="h-4 w-4" /></Button>
+                        <td className="py-3 px-4 text-right space-x-1" onClick={e => e.stopPropagation()}>
+                          <Button variant="ghost" size="icon" onClick={() => openOrderDetail(order)}><Eye className="h-4 w-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => generateDeliveryLabelsPDF([{
                             id: order.id, created_at: order.created_at, customer_name: order.customer_name,
                             customer_phone: order.customer_phone, delivery_address: order.delivery_address,

@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, X, Save, Package, Upload, Image as ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Save, Package, Upload, Image as ImageIcon, Download, Search, AlertTriangle } from 'lucide-react';
 
 interface PriceOption {
   weight: string;
@@ -26,6 +26,8 @@ interface ProductForm {
   in_stock: boolean;
   is_fresh: boolean;
   is_popular: boolean;
+  stock_quantity: number;
+  low_stock_threshold: number;
 }
 
 const emptyForm: ProductForm = {
@@ -39,6 +41,8 @@ const emptyForm: ProductForm = {
   in_stock: true,
   is_fresh: false,
   is_popular: false,
+  stock_quantity: 100,
+  low_stock_threshold: 10,
 };
 
 const ProductsManagement = () => {
@@ -50,6 +54,8 @@ const ProductsManagement = () => {
   const [form, setForm] = useState<ProductForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [filterCategory, setFilterCategory] = useState('all');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetchProducts(); }, []);
@@ -74,6 +80,8 @@ const ProductsManagement = () => {
       in_stock: product.in_stock,
       is_fresh: product.is_fresh || false,
       is_popular: product.is_popular || false,
+      stock_quantity: product.stock_quantity ?? 100,
+      low_stock_threshold: product.low_stock_threshold ?? 10,
     });
     setEditingId(product.id);
     setShowForm(true);
@@ -138,6 +146,8 @@ const ProductsManagement = () => {
       in_stock: form.in_stock,
       is_fresh: form.is_fresh,
       is_popular: form.is_popular,
+      stock_quantity: form.stock_quantity,
+      low_stock_threshold: form.low_stock_threshold,
     };
 
     const { error } = editingId
@@ -172,12 +182,70 @@ const ProductsManagement = () => {
     setForm({ ...form, prices: form.prices.filter((_, i) => i !== index) });
   };
 
+  const downloadProductsCSV = () => {
+    const headers = ['Name', 'Tamil Name', 'Category', 'In Stock', 'Stock Qty', 'Low Stock Threshold', 'Fresh', 'Popular', 'Price Range', 'Images Count'];
+    const rows = products.map(p => {
+      const prices = (p.prices as PriceOption[]) || [];
+      const min = prices.length > 0 ? Math.min(...prices.map(pr => pr.price)) : 0;
+      const max = prices.length > 0 ? Math.max(...prices.map(pr => pr.price)) : 0;
+      return [
+        p.name, p.name_tamil || '', p.category, p.in_stock ? 'Yes' : 'No',
+        p.stock_quantity ?? '', p.low_stock_threshold ?? '',
+        p.is_fresh ? 'Yes' : 'No', p.is_popular ? 'Yes' : 'No',
+        `₹${min} - ₹${max}`, (p.images as string[] || []).length,
+      ];
+    });
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `products-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const filtered = products.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || (p.name_tamil || '').toLowerCase().includes(search.toLowerCase());
+    const matchCategory = filterCategory === 'all' || p.category === filterCategory;
+    return matchSearch && matchCategory;
+  });
+
+  const lowStockCount = products.filter(p => (p.stock_quantity ?? 100) <= (p.low_stock_threshold ?? 10)).length;
+
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-2xl font-bold text-foreground">Product Management</h2>
-          <Button onClick={openCreateForm} className="gap-2"><Plus className="h-4 w-4" /> Add Product</Button>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <h2 className="font-display text-2xl font-bold text-foreground">Product Management</h2>
+            {lowStockCount > 0 && (
+              <Badge variant="destructive" className="gap-1">
+                <AlertTriangle className="h-3 w-3" /> {lowStockCount} Low Stock
+              </Badge>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={downloadProductsCSV}>
+              <Download className="h-4 w-4" /> Export CSV
+            </Button>
+            <Button onClick={openCreateForm} className="gap-2"><Plus className="h-4 w-4" /> Add Product</Button>
+          </div>
+        </div>
+
+        {/* Search and filter */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search products..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+          </div>
+          <select className="px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
+            <option value="all">All Categories</option>
+            <option value="fresh-fish">Fresh Fish</option>
+            <option value="dry-fish">Dry Fish</option>
+            <option value="seafood-specials">Seafood Specials</option>
+            <option value="pickles">Pickles</option>
+          </select>
         </div>
 
         {showForm && (
@@ -203,13 +271,24 @@ const ProductsManagement = () => {
                 <textarea className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground resize-none" rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Product description..." />
               </div>
 
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <select className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-                  <option value="fresh-fish">Fresh Fish</option>
-                  <option value="dry-fish">Dry Fish</option>
-                  <option value="seafood-specials">Seafood Specials</option>
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <select className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+                    <option value="fresh-fish">Fresh Fish</option>
+                    <option value="dry-fish">Dry Fish</option>
+                    <option value="seafood-specials">Seafood Specials</option>
+                    <option value="pickles">Pickles</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Stock Quantity</Label>
+                  <Input type="number" value={form.stock_quantity} onChange={e => setForm({ ...form, stock_quantity: Number(e.target.value) })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Low Stock Alert At</Label>
+                  <Input type="number" value={form.low_stock_threshold} onChange={e => setForm({ ...form, low_stock_threshold: Number(e.target.value) })} />
+                </div>
               </div>
 
               {/* Multi-image upload */}
@@ -296,7 +375,7 @@ const ProductsManagement = () => {
                   { key: 'is_popular' as const, label: 'Popular' },
                 ].map(t => (
                   <label key={t.key} className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={form[t.key]} onChange={e => setForm({ ...form, [t.key]: e.target.checked })} className="rounded" />
+                    <input type="checkbox" checked={form[t.key] as boolean} onChange={e => setForm({ ...form, [t.key]: e.target.checked })} className="rounded" />
                     <span className="text-sm">{t.label}</span>
                   </label>
                 ))}
@@ -318,10 +397,10 @@ const ProductsManagement = () => {
           <CardContent className="p-0">
             {loading ? (
               <div className="p-8 text-center text-muted-foreground">Loading products...</div>
-            ) : products.length === 0 ? (
+            ) : filtered.length === 0 ? (
               <div className="p-12 text-center">
                 <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No products yet. Add your first product!</p>
+                <p className="text-muted-foreground">No products found.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -332,16 +411,20 @@ const ProductsManagement = () => {
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Category</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Images</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Price Range</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Stock</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
                       <th className="text-right py-3 px-4 font-medium text-muted-foreground">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {products.map((product: any) => {
+                    {filtered.map((product: any) => {
                       const prices = (product.prices as PriceOption[]) || [];
                       const minPrice = prices.length > 0 ? Math.min(...prices.map(p => p.price)) : 0;
                       const maxPrice = prices.length > 0 ? Math.max(...prices.map(p => p.price)) : 0;
                       const imgCount = (product.images as string[] || []).length;
+                      const stockQty = product.stock_quantity ?? 100;
+                      const threshold = product.low_stock_threshold ?? 10;
+                      const isLowStock = stockQty <= threshold;
 
                       return (
                         <tr key={product.id} className="border-b last:border-0 hover:bg-muted/30">
@@ -365,6 +448,12 @@ const ProductsManagement = () => {
                             <Badge variant="outline">{imgCount} {imgCount === 1 ? 'image' : 'images'}</Badge>
                           </td>
                           <td className="py-3 px-4 font-medium">₹{minPrice} - ₹{maxPrice}</td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`font-medium ${isLowStock ? 'text-destructive' : 'text-foreground'}`}>{stockQty}</span>
+                              {isLowStock && <AlertTriangle className="h-3.5 w-3.5 text-destructive" />}
+                            </div>
+                          </td>
                           <td className="py-3 px-4">
                             <Badge variant={product.in_stock ? 'default' : 'destructive'}>{product.in_stock ? 'In Stock' : 'Out of Stock'}</Badge>
                           </td>
