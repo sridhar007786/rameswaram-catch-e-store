@@ -1,43 +1,50 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingCart, Phone, User, Shield, LogOut } from 'lucide-react';
+import { Menu, X, ShoppingCart, Phone, User, Shield, LogOut, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
-
-const navLinks = [
-  { name: 'Home', path: '/' },
-  { name: 'Products', path: '/products' },
-  { name: 'Fresh Catch', path: '/products?category=fresh-fish' },
-  { name: 'Contact', path: '/contact' },
-];
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const location = useLocation();
   const { state } = useCart();
   const { user, isAdmin, signOut } = useAuth();
+  const { language, setLanguage, t, languages } = useLanguage();
 
   const isHome = location.pathname === '/';
 
+  const navLinks = [
+    { name: t('nav.home'), path: '/' },
+    { name: t('nav.products'), path: '/products' },
+    { name: t('nav.fresh_catch'), path: '/products?category=fresh-fish' },
+    { name: t('nav.contact'), path: '/contact' },
+  ];
+
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close language dropdown on outside click
+  useEffect(() => {
+    if (!langOpen) return;
+    const close = () => setLangOpen(false);
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, [langOpen]);
+
   return (
     <header
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        isHome && !scrolled
-          ? 'bg-transparent'
-          : 'bg-primary shadow-lg'
+        isHome && !scrolled ? 'bg-transparent' : 'bg-primary shadow-lg'
       )}
     >
       <div className="container mx-auto px-4">
@@ -74,6 +81,37 @@ export const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2 md:gap-3">
+            {/* Language Toggle */}
+            <div className="relative">
+              <Button
+                variant="glass"
+                size="icon"
+                className="h-9 w-9 md:h-10 md:w-10"
+                onClick={(e) => { e.stopPropagation(); setLangOpen(!langOpen); }}
+              >
+                <Globe className="h-4 w-4 md:h-5 md:w-5" />
+              </Button>
+              {langOpen && (
+                <div className="absolute right-0 top-full mt-2 bg-card border border-border rounded-xl shadow-lg py-1 min-w-[140px] z-50 animate-scale-in" onClick={(e) => e.stopPropagation()}>
+                  {languages.map((lang) => (
+                    <button
+                      key={lang.code}
+                      onClick={() => { setLanguage(lang.code); setLangOpen(false); }}
+                      className={cn(
+                        'w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between',
+                        language === lang.code
+                          ? 'bg-primary/10 text-primary font-medium'
+                          : 'text-foreground hover:bg-muted'
+                      )}
+                    >
+                      <span>{lang.nativeName}</span>
+                      {language === lang.code && <span className="text-primary">✓</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {isAdmin && (
               <Link to="/admin">
                 <Button variant="glass" size="icon" className="hidden md:flex h-9 w-9 md:h-10 md:w-10">
@@ -83,18 +121,16 @@ export const Header = () => {
             )}
 
             {user ? (
-              <>
-                <Link to="/account">
-                  <Button variant="glass" size="icon" className="h-9 w-9 md:h-10 md:w-10">
-                    <User className="h-4 w-4 md:h-5 md:w-5" />
-                  </Button>
-                </Link>
-              </>
+              <Link to="/account">
+                <Button variant="glass" size="icon" className="h-9 w-9 md:h-10 md:w-10">
+                  <User className="h-4 w-4 md:h-5 md:w-5" />
+                </Button>
+              </Link>
             ) : (
               <Link to="/auth" className="hidden md:block">
                 <Button variant="glass" size="sm" className="gap-1.5 text-sm">
                   <User className="h-4 w-4" />
-                  Login
+                  {t('nav.login')}
                 </Button>
               </Link>
             )}
@@ -113,7 +149,7 @@ export const Header = () => {
             <a href="tel:+919876543210" className="hidden md:block">
               <Button variant="hero" size="sm" className="gap-2">
                 <Phone className="h-4 w-4" />
-                Order Now
+                {t('nav.order_now')}
               </Button>
             </a>
 
@@ -149,47 +185,31 @@ export const Header = () => {
 
               {user ? (
                 <>
-                  <Link
-                    to="/account"
-                    onClick={() => setIsOpen(false)}
-                    className="text-white/90 hover:text-white font-medium transition-colors py-3 px-4 rounded-lg hover:bg-white/10 flex items-center gap-2"
-                  >
-                    <User className="h-4 w-4" />
-                    My Account
+                  <Link to="/account" onClick={() => setIsOpen(false)}
+                    className="text-white/90 hover:text-white font-medium transition-colors py-3 px-4 rounded-lg hover:bg-white/10 flex items-center gap-2">
+                    <User className="h-4 w-4" /> {t('account.profile')}
                   </Link>
                   {isAdmin && (
-                    <Link
-                      to="/admin"
-                      onClick={() => setIsOpen(false)}
-                      className="text-white/90 hover:text-white font-medium transition-colors py-3 px-4 rounded-lg hover:bg-white/10 flex items-center gap-2"
-                    >
-                      <Shield className="h-4 w-4" />
-                      Admin Panel
+                    <Link to="/admin" onClick={() => setIsOpen(false)}
+                      className="text-white/90 hover:text-white font-medium transition-colors py-3 px-4 rounded-lg hover:bg-white/10 flex items-center gap-2">
+                      <Shield className="h-4 w-4" /> Admin Panel
                     </Link>
                   )}
-                  <button
-                    onClick={() => { signOut(); setIsOpen(false); }}
-                    className="text-white/90 hover:text-white font-medium transition-colors py-3 px-4 rounded-lg hover:bg-white/10 flex items-center gap-2 text-left"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Sign Out
+                  <button onClick={() => { signOut(); setIsOpen(false); }}
+                    className="text-white/90 hover:text-white font-medium transition-colors py-3 px-4 rounded-lg hover:bg-white/10 flex items-center gap-2 text-left">
+                    <LogOut className="h-4 w-4" /> {t('account.sign_out')}
                   </button>
                 </>
               ) : (
-                <Link
-                  to="/auth"
-                  onClick={() => setIsOpen(false)}
-                  className="text-white/90 hover:text-white font-medium transition-colors py-3 px-4 rounded-lg hover:bg-white/10 flex items-center gap-2"
-                >
-                  <User className="h-4 w-4" />
-                  Login / Sign Up
+                <Link to="/auth" onClick={() => setIsOpen(false)}
+                  className="text-white/90 hover:text-white font-medium transition-colors py-3 px-4 rounded-lg hover:bg-white/10 flex items-center gap-2">
+                  <User className="h-4 w-4" /> {t('nav.login')} / Sign Up
                 </Link>
               )}
 
               <a href="tel:+919876543210" className="mt-2">
                 <Button variant="cta" className="w-full gap-2">
-                  <Phone className="h-4 w-4" />
-                  Call to Order
+                  <Phone className="h-4 w-4" /> {t('nav.order_now')}
                 </Button>
               </a>
             </nav>

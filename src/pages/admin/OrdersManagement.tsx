@@ -55,6 +55,7 @@ const OrdersManagement = () => {
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const order = orders.find(o => o.id === orderId);
     const { error } = await supabase
       .from('orders')
       .update({ status: newStatus })
@@ -67,7 +68,48 @@ const OrdersManagement = () => {
       if (selectedOrder?.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus });
       }
+      // Auto WhatsApp status update
+      if (order && ['confirmed', 'packed', 'shipped', 'delivered'].includes(newStatus)) {
+        sendStatusUpdate({
+          id: orderId,
+          customerName: order.customer_name,
+          customerPhone: order.customer_phone,
+          status: newStatus,
+          total: Number(order.total),
+        });
+      }
     }
+  };
+
+  const handleWhatsAppConfirmation = (order: any) => {
+    sendOrderConfirmation({
+      id: order.id,
+      customerName: order.customer_name,
+      customerPhone: order.customer_phone,
+      items: (order.items as any[]) || [],
+      subtotal: Number(order.subtotal),
+      deliveryCharge: Number(order.delivery_charge),
+      total: Number(order.total),
+      address: order.delivery_address,
+      paymentMethod: order.payment_method || 'cod',
+    });
+  };
+
+  const handleDownloadPDF = (order: any) => {
+    generateOrderPDF({
+      id: order.id,
+      created_at: order.created_at,
+      customer_name: order.customer_name,
+      customer_phone: order.customer_phone,
+      customer_email: order.customer_email,
+      delivery_address: order.delivery_address,
+      items: (order.items as any[]) || [],
+      subtotal: Number(order.subtotal),
+      delivery_charge: Number(order.delivery_charge),
+      total: Number(order.total),
+      payment_method: order.payment_method,
+      status: order.status,
+    });
   };
 
   const filteredOrders = filterStatus === 'all'
