@@ -89,7 +89,7 @@ const SalesReport = () => {
     filtered.forEach(o => {
       ((o.items as any[]) || []).forEach((item: any) => {
         const key = item.name || 'Unknown';
-        if (!map[key]) map[key] = { name: key, qty: 0, revenue: 0 };
+        if (!map[key]) map[key] = { name: key, qty: 0, revenue: 0, cost: 0 };
         map[key].qty += item.quantity || 1;
                         map[key].revenue += (item.price || 0) * (item.quantity || 1);
         map[key].cost = costMap[key] || 0;
