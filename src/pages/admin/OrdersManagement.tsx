@@ -198,25 +198,30 @@ const OrdersManagement = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center pt-2 border-t">
-                <div>
-                  <p className="text-sm text-muted-foreground">Subtotal: ₹{Number(selectedOrder.subtotal).toLocaleString()}</p>
-                  <p className="text-sm text-muted-foreground">Delivery: ₹{Number(selectedOrder.delivery_charge).toLocaleString()}</p>
-                  <p className="font-bold text-lg">Total: ₹{Number(selectedOrder.total).toLocaleString()}</p>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Subtotal: ₹{Number(selectedOrder.subtotal).toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">Delivery: ₹{Number(selectedOrder.delivery_charge).toLocaleString()}</p>
+                    <p className="font-bold text-lg">Total: ₹{Number(selectedOrder.total).toLocaleString()}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleWhatsAppConfirmation(selectedOrder)}>
+                      <MessageCircle className="h-4 w-4" /> WhatsApp
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleDownloadPDF(selectedOrder)}>
+                      <FileDown className="h-4 w-4" /> PDF
+                    </Button>
+                    <select
+                      className="px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm"
+                      value={selectedOrder.status}
+                      onChange={(e) => updateOrderStatus(selectedOrder.id, e.target.value)}
+                    >
+                      {ORDER_STATUSES.map((s) => (
+                        <option key={s} value={s} className="capitalize">{s}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Status:</span>
-                  <select
-                    className="px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm"
-                    value={selectedOrder.status}
-                    onChange={(e) => updateOrderStatus(selectedOrder.id, e.target.value)}
-                  >
-                    {ORDER_STATUSES.map((s) => (
-                      <option key={s} value={s} className="capitalize">{s}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
 
               {selectedOrder.notes && (
                 <div>
