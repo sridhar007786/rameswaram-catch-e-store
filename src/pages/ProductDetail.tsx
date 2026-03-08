@@ -1,23 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Star, Truck, Shield, Clock, Plus, Minus, Heart } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Star, Truck, Shield, Clock, Plus, Minus, Heart, Share2, Send } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { products } from '@/data/products';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { ProductGrid } from '@/components/products/ProductGrid';
+
+interface Review {
+  id: string;
+  customer_name: string;
+  rating: number;
+  review_text: string | null;
+  created_at: string;
+  is_featured: boolean;
+}
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { addItem } = useCart();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const product = products.find((p) => p.id === id);
   const [selectedPriceIndex, setSelectedPriceIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [newRating, setNewRating] = useState(5);
+  const [newReviewText, setNewReviewText] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (id) fetchReviews();
+  }, [id]);
+
+  const fetchReviews = async () => {
+    const { data } = await supabase
+      .from('product_reviews')
+      .select('id, customer_name, rating, review_text, created_at, is_featured')
+      .eq('product_id', id!)
+      .eq('is_approved', true)
+      .order('is_featured', { ascending: false })
+      .order('created_at', { ascending: false });
+    setReviews((data as Review[]) || []);
+  };
 
   if (!product) {
     return (
@@ -54,12 +86,45 @@ const ProductDetail = () => {
     });
   };
 
-  // Mock reviews
-  const reviews = [
-    { name: 'Priya S.', rating: 5, text: 'Absolutely fresh! The quality is amazing, will order again.', date: '2 days ago' },
-    { name: 'Kumar R.', rating: 5, text: 'Best seafood I\'ve had delivered. Perfectly packed and fresh.', date: '1 week ago' },
-    { name: 'Lakshmi V.', rating: 4, text: 'Great taste and quality. Delivery was on time. Highly recommended!', date: '2 weeks ago' },
-  ];
+  const handleShare = async () => {
+    const url = window.location.href;
+    const text = `Check out ${product.name} - ₹${selectedPrice.price} at Meenava Sonthangal!`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: product.name, text, url });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast({ title: 'Link copied!', description: 'Product link copied to clipboard.' });
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!user) {
+      toast({ title: 'Please login', description: 'You need to be logged in to write a review.', variant: 'destructive' });
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from('product_reviews').insert({
+      product_id: product.id,
+      user_id: user.id,
+      customer_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous',
+      rating: newRating,
+      review_text: newReviewText || null,
+    });
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Review submitted!', description: 'Your review will appear after approval.' });
+      setNewReviewText('');
+      setNewRating(5);
+    }
+    setSubmitting(false);
+  };
+
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
+    : product.rating?.toString() || '0';
 
   return (
     <Layout>
@@ -79,31 +144,16 @@ const ProductDetail = () => {
             {/* Image Gallery */}
             <div className="space-y-4">
               <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-                {/* Badges */}
+                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  {product.isFresh && (
-                    <Badge variant="fresh" className="shadow-md text-sm">🌊 Fresh Today</Badge>
-                  )}
-                  {discount > 0 && (
-                    <Badge variant="offer" className="shadow-md text-sm">{discount}% OFF</Badge>
-                  )}
+                  {product.isFresh && <Badge variant="fresh" className="shadow-md text-sm">🌊 Fresh Today</Badge>}
+                  {discount > 0 && <Badge variant="offer" className="shadow-md text-sm">{discount}% OFF</Badge>}
                 </div>
               </div>
-              {/* Thumbnail strip (same image repeated as placeholder) */}
               <div className="flex gap-3">
                 {[0, 1, 2].map((i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedImage(i)}
-                    className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                      selectedImage === i ? 'border-primary' : 'border-transparent'
-                    }`}
-                  >
+                  <button key={i} onClick={() => setSelectedImage(i)}
+                    className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${selectedImage === i ? 'border-primary' : 'border-transparent'}`}>
                     <img src={product.image} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
@@ -112,90 +162,64 @@ const ProductDetail = () => {
 
             {/* Product Info */}
             <div className="space-y-6">
-              <div>
-                <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-1">
-                  {product.name}
-                </h1>
-                {product.nameTamil && (
-                  <p className="text-muted-foreground text-lg tamil-text">{product.nameTamil}</p>
-                )}
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-1">{product.name}</h1>
+                  {product.nameTamil && <p className="text-muted-foreground text-lg tamil-text">{product.nameTamil}</p>}
+                </div>
+                <Button variant="outline" size="icon" onClick={handleShare} className="shrink-0">
+                  <Share2 className="h-5 w-5" />
+                </Button>
               </div>
 
               {/* Rating */}
-              {product.rating && (
-                <div className="flex items-center gap-3">
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < Math.floor(product.rating!) ? 'fill-amber-400 text-amber-400' : 'text-muted'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="font-semibold text-foreground">{product.rating}</span>
-                  <span className="text-muted-foreground">({product.reviews} reviews)</span>
+              <div className="flex items-center gap-3">
+                <div className="flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className={`h-5 w-5 ${i < Math.floor(Number(avgRating)) ? 'fill-amber-400 text-amber-400' : 'text-muted'}`} />
+                  ))}
                 </div>
-              )}
+                <span className="font-semibold text-foreground">{avgRating}</span>
+                <span className="text-muted-foreground">({reviews.length || product.reviews || 0} reviews)</span>
+              </div>
 
-              {/* Description */}
               <p className="text-muted-foreground text-lg leading-relaxed">{product.description}</p>
 
               {/* Weight selector */}
               <div>
                 <p className="font-semibold text-foreground mb-3">Select Weight:</p>
-                <div className="flex gap-3">
+                <div className="flex gap-3 flex-wrap">
                   {product.prices.map((price, index) => (
-                    <button
-                      key={price.weight}
-                      onClick={() => setSelectedPriceIndex(index)}
+                    <button key={price.weight} onClick={() => setSelectedPriceIndex(index)}
                       className={`px-5 py-3 rounded-xl text-sm font-medium transition-all border-2 ${
-                        index === selectedPriceIndex
-                          ? 'border-primary bg-primary text-primary-foreground'
-                          : 'border-border bg-card text-foreground hover:border-primary/50'
-                      }`}
-                    >
-                      {price.weight}
-                    </button>
+                        index === selectedPriceIndex ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card text-foreground hover:border-primary/50'
+                      }`}>{price.weight}</button>
                   ))}
                 </div>
               </div>
 
               {/* Price */}
-              <div className="flex items-baseline gap-3">
+              <div className="flex items-baseline gap-3 flex-wrap">
                 <span className="text-4xl font-bold text-foreground">₹{selectedPrice.price}</span>
-                {selectedPrice.originalPrice && (
-                  <span className="text-xl text-muted-foreground line-through">₹{selectedPrice.originalPrice}</span>
-                )}
-                {discount > 0 && (
-                  <Badge variant="offer" className="text-sm">Save {discount}%</Badge>
-                )}
+                {selectedPrice.originalPrice && <span className="text-xl text-muted-foreground line-through">₹{selectedPrice.originalPrice}</span>}
+                {discount > 0 && <Badge variant="offer" className="text-sm">Save {discount}%</Badge>}
               </div>
 
               {/* Quantity & Add to Cart */}
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-center gap-3 bg-muted rounded-xl px-4 py-2">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors"
-                  >
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors">
                     <Minus className="h-4 w-4" />
                   </button>
                   <span className="w-8 text-center font-bold text-lg">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors"
-                  >
+                  <button onClick={() => setQuantity(quantity + 1)} className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors">
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
-
                 <Button variant="cta" size="xl" className="flex-1 gap-2" onClick={handleAddToCart} disabled={!product.inStock}>
                   <ShoppingCart className="h-5 w-5" />
                   Add to Cart — ₹{selectedPrice.price * quantity}
                 </Button>
-
                 <Button variant="outline" size="icon" className="shrink-0 h-14 w-14">
                   <Heart className="h-5 w-5" />
                 </Button>
@@ -222,22 +246,67 @@ const ProductDetail = () => {
           {/* Reviews Section */}
           <section className="mb-20">
             <h2 className="section-title text-foreground mb-8 text-2xl">Customer Reviews</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {reviews.map((review, i) => (
-                <div key={i} className="bg-card rounded-2xl p-6 shadow-ocean">
-                  <div className="flex gap-1 mb-3">
-                    {Array.from({ length: review.rating }).map((_, j) => (
-                      <Star key={j} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <p className="text-foreground mb-4 leading-relaxed">"{review.text}"</p>
-                  <div className="flex justify-between items-center">
-                    <p className="font-semibold text-foreground text-sm">{review.name}</p>
-                    <p className="text-muted-foreground text-xs">{review.date}</p>
-                  </div>
-                </div>
-              ))}
+
+            {/* Write a review */}
+            <div className="bg-card rounded-2xl p-6 shadow-ocean mb-8">
+              <h3 className="font-semibold text-foreground mb-4">Write a Review</h3>
+              <div className="flex gap-1 mb-4">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button key={s} onClick={() => setNewRating(s)}>
+                    <Star className={`h-6 w-6 transition-colors ${s <= newRating ? 'fill-amber-400 text-amber-400' : 'text-muted'}`} />
+                  </button>
+                ))}
+              </div>
+              <Textarea
+                placeholder="Share your experience with this product..."
+                value={newReviewText}
+                onChange={(e) => setNewReviewText(e.target.value)}
+                className="mb-4"
+                rows={3}
+              />
+              <Button onClick={handleSubmitReview} disabled={submitting} className="gap-2">
+                <Send className="h-4 w-4" />
+                {submitting ? 'Submitting...' : 'Submit Review'}
+              </Button>
             </div>
+
+            {reviews.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {reviews.map((review) => (
+                  <div key={review.id} className="bg-card rounded-2xl p-6 shadow-ocean">
+                    {review.is_featured && <Badge className="mb-2 bg-amber-100 text-amber-800">⭐ Featured</Badge>}
+                    <div className="flex gap-1 mb-3">
+                      {Array.from({ length: review.rating }).map((_, j) => (
+                        <Star key={j} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    {review.review_text && <p className="text-foreground mb-4 leading-relaxed">"{review.review_text}"</p>}
+                    <div className="flex justify-between items-center">
+                      <p className="font-semibold text-foreground text-sm">{review.customer_name}</p>
+                      <p className="text-muted-foreground text-xs">{new Date(review.created_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[
+                  { name: 'Priya S.', rating: 5, text: 'Absolutely fresh! The quality is amazing, will order again.' },
+                  { name: 'Kumar R.', rating: 5, text: "Best seafood I've had delivered. Perfectly packed and fresh." },
+                  { name: 'Lakshmi V.', rating: 4, text: 'Great taste and quality. Delivery was on time. Highly recommended!' },
+                ].map((r, i) => (
+                  <div key={i} className="bg-card rounded-2xl p-6 shadow-ocean">
+                    <div className="flex gap-1 mb-3">
+                      {Array.from({ length: r.rating }).map((_, j) => (
+                        <Star key={j} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <p className="text-foreground mb-4 leading-relaxed">"{r.text}"</p>
+                    <p className="font-semibold text-foreground text-sm">{r.name}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Related Products */}

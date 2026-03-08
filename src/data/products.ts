@@ -31,6 +31,13 @@ export const categories: Category[] = [
     icon: '🦐',
     description: 'Premium prawns, crabs & more',
   },
+  {
+    id: 'pickles',
+    name: 'Pickles',
+    nameTamil: 'ஊறுகாய்',
+    icon: '🫙',
+    description: 'Homemade seafood pickles from Kanyakumari',
+  },
 ];
 
 export const products: Product[] = [

@@ -4,7 +4,7 @@ export interface Product {
   name: string;
   nameTamil?: string;
   description: string;
-  category: 'fresh-fish' | 'dry-fish' | 'seafood-specials';
+  category: 'fresh-fish' | 'dry-fish' | 'seafood-specials' | 'pickles';
   image: string;
   prices: {
     weight: string;
