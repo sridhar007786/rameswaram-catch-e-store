@@ -26,9 +26,51 @@ const CheckoutPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const deliveryCharge = state.total >= 500 ? 0 : 50;
-  const grandTotal = state.total + deliveryCharge;
+  const grandTotal = state.total + deliveryCharge - couponDiscount;
+
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    try {
+      const { data, error } = await supabase.from('coupons').select('*')
+        .eq('code', couponCode.toUpperCase().trim()).eq('is_active', true).maybeSingle();
+      if (error || !data) {
+        toast({ title: t('common.error'), description: 'Invalid or expired coupon code.', variant: 'destructive' });
+        setCouponLoading(false); return;
+      }
+      const coupon = data as any;
+      if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+        toast({ title: t('common.error'), description: 'This coupon has expired.', variant: 'destructive' });
+        setCouponLoading(false); return;
+      }
+      if (coupon.usage_limit && coupon.used_count >= coupon.usage_limit) {
+        toast({ title: t('common.error'), description: 'Coupon usage limit reached.', variant: 'destructive' });
+        setCouponLoading(false); return;
+      }
+      if (state.total < (coupon.min_order_amount || 0)) {
+        toast({ title: t('common.error'), description: `Minimum order ₹${coupon.min_order_amount} required.`, variant: 'destructive' });
+        setCouponLoading(false); return;
+      }
+      let discount = coupon.discount_type === 'percentage'
+        ? (state.total * coupon.discount_value) / 100
+        : coupon.discount_value;
+      if (coupon.max_discount && discount > coupon.max_discount) discount = coupon.max_discount;
+      setCouponDiscount(Math.round(discount));
+      setAppliedCoupon(coupon.code);
+      toast({ title: 'Coupon Applied!', description: `You saved ₹${Math.round(discount)}` });
+    } catch { toast({ title: t('common.error'), description: 'Failed to apply coupon.', variant: 'destructive' }); }
+    setCouponLoading(false);
+  };
+
+  const removeCoupon = () => {
+    setCouponDiscount(0); setAppliedCoupon(null); setCouponCode('');
+  };
 
   if (state.items.length === 0 && !orderPlaced) {
     return (
