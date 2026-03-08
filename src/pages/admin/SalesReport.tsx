@@ -10,16 +10,21 @@ const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondar
 
 const SalesReport = () => {
   const [orders, setOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
 
   useEffect(() => {
-    fetchOrders();
+    fetchData();
   }, []);
 
-  const fetchOrders = async () => {
-    const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: true });
-    setOrders(data || []);
+  const fetchData = async () => {
+    const [ordersRes, productsRes] = await Promise.all([
+      supabase.from('orders').select('*').order('created_at', { ascending: true }),
+      supabase.from('products').select('id, name, cost_price, prices'),
+    ]);
+    setOrders(ordersRes.data || []);
+    setProducts(productsRes.data || []);
     setLoading(false);
   };
 
