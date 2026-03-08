@@ -1,13 +1,29 @@
 import { Product, Category } from '@/types/product';
 
-// Import product images (fallback placeholders)
-import freshSnapper from '@/assets/products/fresh-snapper.jpg';
-import tigerPrawns from '@/assets/products/tiger-prawns.jpg';
-import dryFish from '@/assets/products/dry-fish.jpg';
-import blueCrab from '@/assets/products/blue-crab.jpg';
-import pomfret from '@/assets/products/pomfret.jpg';
-import squid from '@/assets/products/squid.jpg';
-import kingFish from '@/assets/products/king-fish.jpg';
+// Import product images
+import nethiliImg from '@/assets/products/nethili.jpg';
+import paalKarelImg from '@/assets/products/paal-karel.jpg';
+import nagaraImg from '@/assets/products/nagara.jpg';
+import iraalKooniImg from '@/assets/products/iraal-kooni.jpg';
+import ayiraiImg from '@/assets/products/ayirai.jpg';
+import thirukkaiImg from '@/assets/products/thirukkai.jpg';
+import manjalPaaraiImg from '@/assets/products/manjal-paarai.jpg';
+import neiVaazhaiImg from '@/assets/products/nei-vaazhai.jpg';
+import muralImg from '@/assets/products/mural.jpg';
+import saalaiImg from '@/assets/products/saalai.jpg';
+import paalPannaImg from '@/assets/products/paal-panna.jpg';
+import paalNethiliImg from '@/assets/products/paal-nethili.jpg';
+import kanavaImg from '@/assets/products/kanava.jpg';
+import paalSuraImg from '@/assets/products/paal-sura.jpg';
+import vanjaramImg from '@/assets/products/vanjaram.jpg';
+import karuvaduImg from '@/assets/products/karuvadu.jpg';
+import savalaiKaruvaduImg from '@/assets/products/savalai-karuvadu.jpg';
+import readyToCookImg from '@/assets/products/ready-to-cook.jpg';
+import neiMeenKaruvaduImg from '@/assets/products/nei-meen-karuvadu.jpg';
+import fishPickleImg from '@/assets/products/fish-pickle.jpg';
+import prawnPickleImg from '@/assets/products/prawn-pickle.jpg';
+import squidPickleImg from '@/assets/products/squid-pickle.jpg';
+import sharkPickleImg from '@/assets/products/shark-pickle.jpg';
 
 export const categories: Category[] = [
   {
@@ -62,7 +78,7 @@ export const products: Product[] = [
     nameTamil: 'நெத்திலி',
     description: 'Fresh anchovy fish, a staple in South Indian cooking. Perfect for fry and kulambu.',
     category: 'fresh-fish',
-    image: freshSnapper,
+    image: nethiliImg,
     prices: [{ weight: '1/2 kg', price: 290 }],
     inStock: true,
     isFresh: true,
@@ -75,7 +91,7 @@ export const products: Product[] = [
     nameTamil: 'பால் கரெல்',
     description: 'Tender white sardine with delicate flavor. Excellent fried or in curry.',
     category: 'fresh-fish',
-    image: freshSnapper,
+    image: paalKarelImg,
     prices: [{ weight: '1/2 kg', price: 320 }],
     inStock: true,
     isFresh: true,
@@ -88,7 +104,7 @@ export const products: Product[] = [
     nameTamil: 'நகரா',
     description: 'Reef cod with firm white flesh. Ideal for gravies and fried preparations.',
     category: 'fresh-fish',
-    image: pomfret,
+    image: nagaraImg,
     prices: [{ weight: '1/2 kg', price: 340 }],
     inStock: true,
     isFresh: true,
@@ -101,7 +117,7 @@ export const products: Product[] = [
     nameTamil: 'இறால் கூனி',
     description: 'Small shrimp with sweet, delicate taste. Great in masala or stir-fry.',
     category: 'fresh-fish',
-    image: tigerPrawns,
+    image: iraalKooniImg,
     prices: [{ weight: '1/2 kg', price: 340 }],
     inStock: true,
     isFresh: true,
@@ -114,7 +130,7 @@ export const products: Product[] = [
     nameTamil: 'அயிரா குஞ்சு',
     description: 'Baby loach fish, a traditional delicacy. Rich in flavor and nutrients.',
     category: 'fresh-fish',
-    image: freshSnapper,
+    image: ayiraiImg,
     prices: [{ weight: '1/2 kg', price: 345 }],
     inStock: true,
     isFresh: true,
@@ -127,7 +143,7 @@ export const products: Product[] = [
     nameTamil: 'அயிரை',
     description: 'Loach fish prized for its unique taste. A specialty of Kanyakumari region.',
     category: 'fresh-fish',
-    image: freshSnapper,
+    image: ayiraiImg,
     prices: [{ weight: '1/2 kg', price: 310 }],
     inStock: true,
     isFresh: true,
@@ -140,7 +156,7 @@ export const products: Product[] = [
     nameTamil: 'திருக்கை',
     description: 'Stingray with tender, flavorful meat. Excellent in spicy curries.',
     category: 'fresh-fish',
-    image: blueCrab,
+    image: thirukkaiImg,
     prices: [{ weight: '1/2 kg', price: 240 }],
     inStock: true,
     isFresh: true,
@@ -153,7 +169,7 @@ export const products: Product[] = [
     nameTamil: 'மஞ்சள் பாறை',
     description: 'Yellowfin trevally, firm-fleshed and versatile. Great grilled or in curry.',
     category: 'fresh-fish',
-    image: kingFish,
+    image: manjalPaaraiImg,
     prices: [{ weight: '1/2 kg', price: 430 }],
     inStock: true,
     isFresh: true,
@@ -166,7 +182,7 @@ export const products: Product[] = [
     nameTamil: 'நெய் வாழை',
     description: 'Butterfish with rich, buttery flavor. Melts in your mouth when fried.',
     category: 'fresh-fish',
-    image: pomfret,
+    image: neiVaazhaiImg,
     prices: [{ weight: '1/2 kg', price: 290 }],
     inStock: true,
     isFresh: true,
@@ -179,7 +195,7 @@ export const products: Product[] = [
     nameTamil: 'முரல்',
     description: 'Barracuda with lean, flavorful meat. Ideal for fry and kulambu preparations.',
     category: 'fresh-fish',
-    image: kingFish,
+    image: muralImg,
     prices: [{ weight: '1/2 kg', price: 250 }],
     inStock: true,
     isFresh: true,
@@ -192,7 +208,7 @@ export const products: Product[] = [
     nameTamil: 'சாலை',
     description: 'Sardine, the everyday favorite. Affordable and rich in omega-3 fatty acids.',
     category: 'fresh-fish',
-    image: freshSnapper,
+    image: saalaiImg,
     prices: [{ weight: '1/2 kg', price: 230 }],
     inStock: true,
     isFresh: true,
@@ -205,7 +221,7 @@ export const products: Product[] = [
     nameTamil: 'பால் பண்ணா',
     description: 'White snapper with mild, sweet flavor. Perfect for light curries and steaming.',
     category: 'fresh-fish',
-    image: freshSnapper,
+    image: paalPannaImg,
     prices: [{ weight: '1/2 kg', price: 350 }],
     inStock: true,
     isFresh: true,
@@ -220,7 +236,7 @@ export const products: Product[] = [
     nameTamil: 'பால் நெத்திலி',
     description: 'Premium white anchovy, the finest quality. Delicate taste, melts in mouth.',
     category: 'premium-fish',
-    image: freshSnapper,
+    image: paalNethiliImg,
     prices: [{ weight: '1/2 kg', price: 450 }],
     inStock: true,
     isFresh: true,
@@ -234,7 +250,7 @@ export const products: Product[] = [
     nameTamil: 'கணவாய்',
     description: 'Fresh squid, cleaned and ready to cook. Tender and flavorful.',
     category: 'premium-fish',
-    image: squid,
+    image: kanavaImg,
     prices: [{ weight: '1/2 kg', price: 550 }],
     inStock: true,
     isFresh: true,
@@ -248,7 +264,7 @@ export const products: Product[] = [
     nameTamil: 'கணவாய் 1st குவாலிட்டி',
     description: 'Top-grade squid, hand-selected for premium quality. The best of the catch.',
     category: 'premium-fish',
-    image: squid,
+    image: kanavaImg,
     prices: [{ weight: '1/2 kg', price: 900 }],
     inStock: true,
     isFresh: true,
@@ -262,7 +278,7 @@ export const products: Product[] = [
     nameTamil: 'பால் சுறா',
     description: 'Premium baby shark, tender and protein-rich. A Kanyakumari specialty.',
     category: 'premium-fish',
-    image: kingFish,
+    image: paalSuraImg,
     prices: [{ weight: '1/2 kg', price: 490 }],
     inStock: true,
     isFresh: true,
@@ -276,7 +292,7 @@ export const products: Product[] = [
     nameTamil: 'வஞ்சிரம் நெய் மீன்',
     description: 'Premium seer fish steaks, the king of Indian seafood. Rich, buttery flavor.',
     category: 'premium-fish',
-    image: kingFish,
+    image: vanjaramImg,
     prices: [{ weight: '1/2 kg', price: 530 }],
     inStock: true,
     isFresh: true,
@@ -292,7 +308,7 @@ export const products: Product[] = [
     nameTamil: 'வேலமீன் குழி கருவாடு',
     description: 'Traditional pit-dried sailfish. Intense flavor, perfect for chutneys and fry.',
     category: 'dry-fish',
-    image: dryFish,
+    image: karuvaduImg,
     prices: [{ weight: '1/2 kg', price: 380 }],
     inStock: true,
     rating: 4.7,
@@ -304,7 +320,7 @@ export const products: Product[] = [
     nameTamil: 'சவாலை கருவாடு',
     description: 'Sun-dried trevally, a classic dry fish variety. Rich and flavorful.',
     category: 'dry-fish',
-    image: dryFish,
+    image: savalaiKaruvaduImg,
     prices: [{ weight: '1/2 kg', price: 320 }],
     inStock: true,
     rating: 4.6,
@@ -318,7 +334,7 @@ export const products: Product[] = [
     nameTamil: 'முரல் – சமைக்க தயார்',
     description: 'Cleaned, marinated barracuda ready for instant frying. Just heat and eat!',
     category: 'ready-to-cook',
-    image: kingFish,
+    image: readyToCookImg,
     prices: [{ weight: '100g', price: 150 }],
     inStock: true,
     rating: 4.8,
@@ -330,7 +346,7 @@ export const products: Product[] = [
     nameTamil: 'நவரா – சமைக்க தயார்',
     description: 'Pre-marinated navara fish, seasoned with traditional spices. Quick and delicious.',
     category: 'ready-to-cook',
-    image: freshSnapper,
+    image: readyToCookImg,
     prices: [{ weight: '100g', price: 150 }],
     inStock: true,
     rating: 4.7,
@@ -342,7 +358,7 @@ export const products: Product[] = [
     nameTamil: 'அயிரை – சமைக்க தயார்',
     description: 'Marinated loach fish, ready for the pan. A rare delicacy made easy.',
     category: 'ready-to-cook',
-    image: freshSnapper,
+    image: readyToCookImg,
     prices: [{ weight: '100g', price: 150 }],
     inStock: true,
     rating: 4.6,
@@ -356,7 +372,7 @@ export const products: Product[] = [
     nameTamil: 'நெய் மீன் பட்டறை கருவாடு',
     description: '🔥 LIMITED TIME OFFER! Premium dried seer fish – 1kg pack with 3 FREE combo items from Saalai, Mural, Chinna Kooni, Ayirai Kunju, or Nei Vaazhai. An unbeatable deal!',
     category: 'special-offers',
-    image: kingFish,
+    image: neiMeenKaruvaduImg,
     prices: [{ weight: '1 kg', price: 1300 }],
     inStock: true,
     isPopular: true,
@@ -371,7 +387,7 @@ export const products: Product[] = [
     nameTamil: 'சூரை மீன் ஊறுகாய்',
     description: 'Authentic homemade tuna pickle with traditional Kanyakumari spices and gingelly oil.',
     category: 'pickles',
-    image: kingFish,
+    image: fishPickleImg,
     prices: [{ weight: '1/4 kg', price: 480 }],
     inStock: true,
     isPopular: true,
@@ -384,7 +400,7 @@ export const products: Product[] = [
     nameTamil: 'இறால் மீன் ஊறுகாய்',
     description: 'Spicy prawn pickle with hand-picked prawns and aromatic spices. A true delicacy.',
     category: 'pickles',
-    image: tigerPrawns,
+    image: prawnPickleImg,
     prices: [{ weight: '1/4 kg', price: 700 }],
     inStock: true,
     rating: 4.7,
@@ -396,7 +412,7 @@ export const products: Product[] = [
     nameTamil: 'கணவாய் மீன் ஊறுகாய்',
     description: 'Rich squid pickle made with fresh squid and traditional spice blend.',
     category: 'pickles',
-    image: squid,
+    image: squidPickleImg,
     prices: [{ weight: '1/4 kg', price: 680 }],
     inStock: true,
     rating: 4.6,
@@ -408,7 +424,7 @@ export const products: Product[] = [
     nameTamil: 'பால் சுறா மீன் ஊறுகாய்',
     description: 'Premium baby shark pickle with fiery red chillies and aromatic spices.',
     category: 'pickles',
-    image: kingFish,
+    image: sharkPickleImg,
     prices: [{ weight: '1/4 kg', price: 550 }],
     inStock: true,
     rating: 4.7,
