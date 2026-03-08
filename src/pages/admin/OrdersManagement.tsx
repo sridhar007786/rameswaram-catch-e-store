@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ShoppingCart, Eye, X, MessageCircle, FileDown, Printer, CalendarDays } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { sendOrderConfirmation, sendStatusUpdate } from '@/utils/whatsapp';
 import { generateOrderPDF } from '@/utils/pdf';
 import { generateDeliveryLabelsPDF } from '@/utils/deliveryLabels';
@@ -27,8 +28,40 @@ const OrdersManagement = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [dateFilter, setDateFilter] = useState<string>('all'); // 'all' | 'today' | 'custom'
+  const [dateFilter, setDateFilter] = useState<string>('all');
   const [customDate, setCustomDate] = useState<string>('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredOrders.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredOrders.map(o => o.id)));
+    }
+  };
+
+  const handleDownloadSelectedLabels = () => {
+    const selected = filteredOrders.filter(o => selectedIds.has(o.id));
+    if (selected.length === 0) {
+      toast({ title: 'No orders selected', description: 'Select orders to generate labels.', variant: 'destructive' });
+      return;
+    }
+    generateDeliveryLabelsPDF(
+      selected.map((o) => ({
+        id: o.id, created_at: o.created_at, customer_name: o.customer_name,
+        customer_phone: o.customer_phone, delivery_address: o.delivery_address,
+        items: (o.items as any[]) || [], total: Number(o.total), payment_method: o.payment_method,
+      }))
+    );
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -129,8 +162,13 @@ const OrdersManagement = () => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 className="font-display text-2xl font-bold text-foreground">Order Management</h2>
             <div className="flex gap-2 flex-wrap">
+              {selectedIds.size > 0 && (
+                <Button variant="default" size="sm" className="gap-1.5" onClick={handleDownloadSelectedLabels}>
+                  <Printer className="h-4 w-4" /> Labels for Selected ({selectedIds.size})
+                </Button>
+              )}
               <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownloadAllLabels}>
-                <Printer className="h-4 w-4" /> Download Labels ({filteredOrders.length})
+                <Printer className="h-4 w-4" /> All Labels ({filteredOrders.length})
               </Button>
             </div>
           </div>
@@ -257,6 +295,9 @@ const OrdersManagement = () => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/50">
+                      <th className="py-3 px-4 w-10">
+                        <Checkbox checked={filteredOrders.length > 0 && selectedIds.size === filteredOrders.length} onCheckedChange={toggleSelectAll} />
+                      </th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Order ID</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Customer</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Phone</th>
@@ -269,7 +310,10 @@ const OrdersManagement = () => {
                   </thead>
                   <tbody>
                     {filteredOrders.map((order: any) => (
-                      <tr key={order.id} className="border-b last:border-0 hover:bg-muted/30">
+                      <tr key={order.id} className={`border-b last:border-0 hover:bg-muted/30 ${selectedIds.has(order.id) ? 'bg-primary/5' : ''}`}>
+                        <td className="py-3 px-4">
+                          <Checkbox checked={selectedIds.has(order.id)} onCheckedChange={() => toggleSelect(order.id)} />
+                        </td>
                         <td className="py-3 px-4 font-mono text-xs">{order.id.slice(0, 8)}...</td>
                         <td className="py-3 px-4 font-medium">{order.customer_name}</td>
                         <td className="py-3 px-4">{order.customer_phone}</td>
