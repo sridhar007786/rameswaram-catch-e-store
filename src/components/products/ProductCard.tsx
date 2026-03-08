@@ -43,6 +43,9 @@ export const ProductCard = ({ product, onViewDetails }: ProductCardProps) => {
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {product.isFresh && <Badge variant="fresh" className="shadow-md">{t('products.fresh_today')}</Badge>}
           {discount > 0 && <Badge variant="offer" className="shadow-md">{discount}% OFF</Badge>}
+          {product.category === 'premium-fish' && <Badge variant="premium" className="shadow-md">⭐ Premium</Badge>}
+          {product.category === 'special-offers' && <Badge variant="offer" className="shadow-md">🔥 Special Offer</Badge>}
+          {product.category === 'ready-to-cook' && <Badge variant="category" className="shadow-md">🍳 Ready to Cook</Badge>}
         </div>
         <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
           <Button variant="cta" size="icon" onClick={handleAddToCart} className="rounded-full shadow-lg">

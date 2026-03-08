@@ -35,7 +35,7 @@ export const CategoriesSection = () => {
           <p className="section-subtitle">{t('categories.subtitle')}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {categories.map((category, index) => (
             <Link
               key={category.id}
