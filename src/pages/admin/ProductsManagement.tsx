@@ -484,6 +484,14 @@ const ProductsManagement = () => {
                             <Badge variant="outline">{imgCount} {imgCount === 1 ? 'image' : 'images'}</Badge>
                           </td>
                           <td className="py-3 px-4 font-medium">₹{minPrice} - ₹{maxPrice}</td>
+                          <td className="py-3 px-4 text-muted-foreground">₹{product.cost_price ?? 0}</td>
+                          <td className="py-3 px-4">
+                            {(product.cost_price ?? 0) > 0 && minPrice > 0 ? (
+                              <span className={`font-medium ${((minPrice - (product.cost_price ?? 0)) / minPrice * 100) > 20 ? 'text-green-600' : 'text-amber-600'}`}>
+                                {((minPrice - (product.cost_price ?? 0)) / minPrice * 100).toFixed(0)}%
+                              </span>
+                            ) : <span className="text-muted-foreground">—</span>}
+                          </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-1.5">
                               <span className={`font-medium ${isLowStock ? 'text-destructive' : 'text-foreground'}`}>{stockQty}</span>

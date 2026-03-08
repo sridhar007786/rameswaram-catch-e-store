@@ -253,6 +253,19 @@ const SalesReport = () => {
                             <td className="py-3 px-4 font-medium">{p.name}</td>
                             <td className="py-3 px-4">{p.qty}</td>
                             <td className="py-3 px-4 text-right font-semibold">₹{p.revenue.toLocaleString()}</td>
+                            <td className="py-3 px-4 text-right text-muted-foreground">₹{(p.cost * p.qty).toLocaleString()}</td>
+                            <td className="py-3 px-4 text-right font-semibold">
+                              <span className={p.revenue - p.cost * p.qty >= 0 ? 'text-green-600' : 'text-destructive'}>
+                                ₹{(p.revenue - p.cost * p.qty).toLocaleString()}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              {p.revenue > 0 ? (
+                                <span className={((p.revenue - p.cost * p.qty) / p.revenue * 100) >= 20 ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'}>
+                                  {((p.revenue - p.cost * p.qty) / p.revenue * 100).toFixed(1)}%
+                                </span>
+                              ) : '—'}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
