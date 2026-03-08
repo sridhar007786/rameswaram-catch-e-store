@@ -28,6 +28,7 @@ interface ProductForm {
   is_popular: boolean;
   stock_quantity: number;
   low_stock_threshold: number;
+  cost_price: number;
 }
 
 const emptyForm: ProductForm = {
