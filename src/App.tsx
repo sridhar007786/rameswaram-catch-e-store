@@ -23,6 +23,7 @@ import StaffManagement from "./pages/admin/StaffManagement";
 import Settings from "./pages/admin/Settings";
 import ReviewsManagement from "./pages/admin/ReviewsManagement";
 import TrackingManagement from "./pages/admin/TrackingManagement";
+import CouponsManagement from "./pages/admin/CouponsManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
