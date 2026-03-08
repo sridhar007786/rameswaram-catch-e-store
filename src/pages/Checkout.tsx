@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, Banknote, MessageCircle, CheckCircle, MapPin } from 'lucide-react';
+import { sendAdminNewOrderAlert, sendOrderConfirmation } from '@/utils/whatsapp';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -130,6 +131,24 @@ const CheckoutPage = () => {
       setOrderId(data.id);
       setOrderPlaced(true);
       toast({ title: 'Order placed successfully!' });
+
+      // WhatsApp automations
+      const orderData = {
+        id: data.id,
+        customerName: form.name,
+        customerPhone: form.phone,
+        items: orderItems,
+        subtotal: state.total,
+        deliveryCharge,
+        total: grandTotal,
+        address: `${form.address}, ${form.city} - ${form.pincode}`,
+        paymentMethod,
+      };
+      sendOrderConfirmation(orderData);
+      sendAdminNewOrderAlert({
+        ...orderData,
+        customerPhone: form.phone,
+      });
     } catch (err: any) {
       console.error('Order error:', err);
       toast({ title: 'Error', description: err.message || 'Failed to place order.', variant: 'destructive' });

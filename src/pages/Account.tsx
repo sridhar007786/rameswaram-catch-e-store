@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Navigate, Link } from 'react-router-dom';
-import { User, Package, MapPin, LogOut, ChevronRight, Phone, Mail, Edit2, Save, X, Clock, CheckCircle, Truck as TruckIcon, Box } from 'lucide-react';
+import { User, Package, MapPin, LogOut, ChevronRight, Phone, Mail, Edit2, Save, X, Clock, CheckCircle, Truck as TruckIcon, Box, FileDown } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { generateOrderPDF } from '@/utils/pdf';
 
 interface Order {
   id: string;
@@ -299,9 +300,32 @@ const AccountPage = () => {
                             <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                             <span className="line-clamp-1">{order.delivery_address}</span>
                           </div>
-                          <span className="text-lg font-bold text-foreground whitespace-nowrap">
-                            ₹{order.total}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5 text-xs"
+                              onClick={() => generateOrderPDF({
+                                id: order.id,
+                                created_at: order.created_at,
+                                customer_name: user!.user_metadata?.full_name || user!.email || '',
+                                customer_phone: profile.phone || '',
+                                customer_email: user!.email,
+                                delivery_address: order.delivery_address,
+                                items: (order.items as any[]) || [],
+                                subtotal: Number(order.total) - 0,
+                                delivery_charge: 0,
+                                total: Number(order.total),
+                                payment_method: order.payment_method,
+                                status: order.status,
+                              })}
+                            >
+                              <FileDown className="h-3.5 w-3.5" /> PDF
+                            </Button>
+                            <span className="text-lg font-bold text-foreground whitespace-nowrap">
+                              ₹{order.total}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>

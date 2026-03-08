@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Eye, X, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Eye, X, ChevronDown, MessageCircle, FileDown } from 'lucide-react';
+import { sendOrderConfirmation, sendStatusUpdate, sendAdminNewOrderAlert } from '@/utils/whatsapp';
+import { generateOrderPDF } from '@/utils/pdf';
 
 const ORDER_STATUSES = ['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled'];
 
@@ -53,6 +55,7 @@ const OrdersManagement = () => {
   };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    const order = orders.find(o => o.id === orderId);
     const { error } = await supabase
       .from('orders')
       .update({ status: newStatus })
@@ -65,7 +68,48 @@ const OrdersManagement = () => {
       if (selectedOrder?.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus });
       }
+      // Auto WhatsApp status update
+      if (order && ['confirmed', 'packed', 'shipped', 'delivered'].includes(newStatus)) {
+        sendStatusUpdate({
+          id: orderId,
+          customerName: order.customer_name,
+          customerPhone: order.customer_phone,
+          status: newStatus,
+          total: Number(order.total),
+        });
+      }
     }
+  };
+
+  const handleWhatsAppConfirmation = (order: any) => {
+    sendOrderConfirmation({
+      id: order.id,
+      customerName: order.customer_name,
+      customerPhone: order.customer_phone,
+      items: (order.items as any[]) || [],
+      subtotal: Number(order.subtotal),
+      deliveryCharge: Number(order.delivery_charge),
+      total: Number(order.total),
+      address: order.delivery_address,
+      paymentMethod: order.payment_method || 'cod',
+    });
+  };
+
+  const handleDownloadPDF = (order: any) => {
+    generateOrderPDF({
+      id: order.id,
+      created_at: order.created_at,
+      customer_name: order.customer_name,
+      customer_phone: order.customer_phone,
+      customer_email: order.customer_email,
+      delivery_address: order.delivery_address,
+      items: (order.items as any[]) || [],
+      subtotal: Number(order.subtotal),
+      delivery_charge: Number(order.delivery_charge),
+      total: Number(order.total),
+      payment_method: order.payment_method,
+      status: order.status,
+    });
   };
 
   const filteredOrders = filterStatus === 'all'
@@ -154,25 +198,30 @@ const OrdersManagement = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center pt-2 border-t">
-                <div>
-                  <p className="text-sm text-muted-foreground">Subtotal: ₹{Number(selectedOrder.subtotal).toLocaleString()}</p>
-                  <p className="text-sm text-muted-foreground">Delivery: ₹{Number(selectedOrder.delivery_charge).toLocaleString()}</p>
-                  <p className="font-bold text-lg">Total: ₹{Number(selectedOrder.total).toLocaleString()}</p>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Subtotal: ₹{Number(selectedOrder.subtotal).toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">Delivery: ₹{Number(selectedOrder.delivery_charge).toLocaleString()}</p>
+                    <p className="font-bold text-lg">Total: ₹{Number(selectedOrder.total).toLocaleString()}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleWhatsAppConfirmation(selectedOrder)}>
+                      <MessageCircle className="h-4 w-4" /> WhatsApp
+                    </Button>
+                    <Button variant="outline" size="sm" className="gap-1.5" onClick={() => handleDownloadPDF(selectedOrder)}>
+                      <FileDown className="h-4 w-4" /> PDF
+                    </Button>
+                    <select
+                      className="px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm"
+                      value={selectedOrder.status}
+                      onChange={(e) => updateOrderStatus(selectedOrder.id, e.target.value)}
+                    >
+                      {ORDER_STATUSES.map((s) => (
+                        <option key={s} value={s} className="capitalize">{s}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Status:</span>
-                  <select
-                    className="px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm"
-                    value={selectedOrder.status}
-                    onChange={(e) => updateOrderStatus(selectedOrder.id, e.target.value)}
-                  >
-                    {ORDER_STATUSES.map((s) => (
-                      <option key={s} value={s} className="capitalize">{s}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
 
               {selectedOrder.notes && (
                 <div>
