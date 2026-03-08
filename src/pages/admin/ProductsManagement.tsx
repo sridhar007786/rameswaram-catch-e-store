@@ -246,9 +246,11 @@ const ProductsManagement = () => {
           <select className="px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm" value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
             <option value="all">All Categories</option>
             <option value="fresh-fish">Fresh Fish</option>
-            <option value="dry-fish">Dry Fish</option>
-            <option value="seafood-specials">Seafood Specials</option>
-            <option value="pickles">Pickles</option>
+            <option value="premium-fish">Premium Fish</option>
+            <option value="ready-to-cook">Ready to Cook</option>
+            <option value="dry-fish">Dry Fish (Karuvadu)</option>
+            <option value="special-offers">Special Offers</option>
+            <option value="pickles">Homemade Fish Pickles</option>
           </select>
         </div>
 
@@ -280,9 +282,11 @@ const ProductsManagement = () => {
                   <Label>Category</Label>
                   <select className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
                     <option value="fresh-fish">Fresh Fish</option>
-                    <option value="dry-fish">Dry Fish</option>
-                    <option value="seafood-specials">Seafood Specials</option>
-                    <option value="pickles">Pickles</option>
+                    <option value="premium-fish">Premium Fish</option>
+                    <option value="ready-to-cook">Ready to Cook</option>
+                    <option value="dry-fish">Dry Fish (Karuvadu)</option>
+                    <option value="special-offers">Special Offers</option>
+                    <option value="pickles">Homemade Fish Pickles</option>
                   </select>
                 </div>
                 <div className="space-y-2">

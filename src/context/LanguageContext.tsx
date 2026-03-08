@@ -39,12 +39,16 @@ const translations: Translations = {
   // Category names & descriptions
   'category.fresh_fish': { en: 'Fresh Fish', ta: 'புதிய மீன்', hi: 'ताज़ी मछली' },
   'category.fresh_fish_desc': { en: 'Caught fresh daily from Kanyakumari waters', ta: 'கன்னியாகுமரி கடலில் தினமும் புதிதாக பிடிக்கப்படுகிறது', hi: 'कन्याकुमारी के पानी से रोज़ाना ताज़ा पकड़ी जाती है' },
-  'category.dry_fish': { en: 'Dry Fish', ta: 'காய்ந்த மீன்', hi: 'सूखी मछली' },
+  'category.premium_fish': { en: 'Premium Fish', ta: 'உயர்தர மீன்', hi: 'प्रीमियम मछली' },
+  'category.premium_fish_desc': { en: 'Top-quality premium seafood selections', ta: 'உயர்தர கடல் உணவு தேர்வுகள்', hi: 'शीर्ष गुणवत्ता प्रीमियम समुद्री भोजन' },
+  'category.ready_to_cook': { en: 'Ready to Cook', ta: 'சமைக்க தயார்', hi: 'पकाने के लिए तैयार' },
+  'category.ready_to_cook_desc': { en: 'Cleaned, marinated & ready for your pan', ta: 'சுத்தம் செய்யப்பட்டு, மசாலா சேர்க்கப்பட்டு தயார்', hi: 'साफ, मैरीनेट और तैयार' },
+  'category.dry_fish': { en: 'Dry Fish (Karuvadu)', ta: 'காய்ந்த மீன் (கருவாடு)', hi: 'सूखी मछली (करुवाडु)' },
   'category.dry_fish_desc': { en: 'Traditional sun-dried seafood', ta: 'பாரம்பரிய வெயிலில் உலர்த்தப்பட்ட கடல் உணவு', hi: 'पारंपरिक धूप में सुखाया हुआ समुद्री भोजन' },
-  'category.seafood_specials': { en: 'Seafood Specials', ta: 'கடல் உணவு சிறப்பு', hi: 'सीफ़ूड स्पेशल' },
-  'category.seafood_specials_desc': { en: 'Premium prawns, crabs & more', ta: 'உயர்தர இறால், நண்டு மற்றும் பல', hi: 'प्रीमियम झींगा, केकड़ा और बहुत कुछ' },
-  'category.pickles': { en: 'Pickles', ta: 'ஊறுகாய்', hi: 'अचार' },
-  'category.pickles_desc': { en: 'Homemade seafood pickles from Kanyakumari', ta: 'கன்னியாகுமரி வீட்டு கடல் உணவு ஊறுகாய்', hi: 'कन्याकुमारी से घर का बना समुद्री अचार' },
+  'category.special_offers': { en: 'Special Offers', ta: 'சிறப்பு சலுகைகள்', hi: 'विशेष ऑफ़र' },
+  'category.special_offers_desc': { en: 'Limited-time deals & combo packs', ta: 'குறிப்பிட்ட நேர சலுகைகள் & காம்போ பேக்குகள்', hi: 'सीमित समय के सौदे और कॉम्बो पैक' },
+  'category.pickles': { en: 'Homemade Fish Pickles', ta: 'வீட்டு மீன் ஊறுகாய்', hi: 'घर का बना मछली अचार' },
+  'category.pickles_desc': { en: 'Authentic homemade seafood pickles from Kanyakumari', ta: 'கன்னியாகுமரி வீட்டு கடல் உணவு ஊறுகாய்', hi: 'कन्याकुमारी से घर का बना समुद्री अचार' },
 
   // Featured Products
   'featured.title': { en: "Today's Fresh Catch", ta: 'இன்றைய புதிய மீன்', hi: 'आज की ताज़ी पकड़' },

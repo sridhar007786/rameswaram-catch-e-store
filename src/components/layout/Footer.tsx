@@ -40,10 +40,11 @@ export const Footer = () => {
             <ul className="space-y-3">
               {[
                 { name: t('footer.fresh_fish'), path: '/products?category=fresh-fish' },
+                { name: 'Premium Fish', path: '/products?category=premium-fish' },
+                { name: 'Ready to Cook', path: '/products?category=ready-to-cook' },
                 { name: t('footer.dry_fish'), path: '/products?category=dry-fish' },
-                { name: t('footer.seafood_specials'), path: '/products?category=seafood-specials' },
-                { name: t('footer.todays_catch'), path: '/products' },
-                { name: t('footer.offers'), path: '/offers' },
+                { name: 'Special Offers', path: '/products?category=special-offers' },
+                { name: 'Fish Pickles', path: '/products?category=pickles' },
               ].map((link) => (
                 <li key={link.path}>
                   <Link to={link.path} className="text-white/70 hover:text-white transition-colors text-sm">{link.name}</Link>

@@ -10,9 +10,11 @@ export const CategoriesSection = () => {
     if (language === 'hi') {
       const hiMap: Record<string, string> = {
         'fresh-fish': 'ताज़ी मछली',
-        'dry-fish': 'सूखी मछली',
-        'seafood-specials': 'सीफ़ूड स्पेशल',
-        'pickles': 'अचार',
+        'premium-fish': 'प्रीमियम मछली',
+        'ready-to-cook': 'पकाने के लिए तैयार',
+        'dry-fish': 'सूखी मछली (करुवाडु)',
+        'special-offers': 'विशेष ऑफ़र',
+        'pickles': 'घर का बना मछली अचार',
       };
       return hiMap[cat.id] || cat.name;
     }
@@ -33,7 +35,7 @@ export const CategoriesSection = () => {
           <p className="section-subtitle">{t('categories.subtitle')}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {categories.map((category, index) => (
             <Link
               key={category.id}
