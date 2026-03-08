@@ -161,8 +161,13 @@ const OrdersManagement = () => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <h2 className="font-display text-2xl font-bold text-foreground">Order Management</h2>
             <div className="flex gap-2 flex-wrap">
+              {selectedIds.size > 0 && (
+                <Button variant="default" size="sm" className="gap-1.5" onClick={handleDownloadSelectedLabels}>
+                  <Printer className="h-4 w-4" /> Labels for Selected ({selectedIds.size})
+                </Button>
+              )}
               <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownloadAllLabels}>
-                <Printer className="h-4 w-4" /> Download Labels ({filteredOrders.length})
+                <Printer className="h-4 w-4" /> All Labels ({filteredOrders.length})
               </Button>
             </div>
           </div>
