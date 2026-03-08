@@ -91,7 +91,8 @@ const SalesReport = () => {
         const key = item.name || 'Unknown';
         if (!map[key]) map[key] = { name: key, qty: 0, revenue: 0 };
         map[key].qty += item.quantity || 1;
-        map[key].revenue += (item.price || 0) * (item.quantity || 1);
+                        map[key].revenue += (item.price || 0) * (item.quantity || 1);
+        map[key].cost = costMap[key] || 0;
       });
     });
     return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
