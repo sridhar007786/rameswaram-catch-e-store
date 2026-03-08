@@ -309,7 +309,10 @@ const OrdersManagement = () => {
                   </thead>
                   <tbody>
                     {filteredOrders.map((order: any) => (
-                      <tr key={order.id} className="border-b last:border-0 hover:bg-muted/30">
+                      <tr key={order.id} className={`border-b last:border-0 hover:bg-muted/30 ${selectedIds.has(order.id) ? 'bg-primary/5' : ''}`}>
+                        <td className="py-3 px-4">
+                          <Checkbox checked={selectedIds.has(order.id)} onCheckedChange={() => toggleSelect(order.id)} />
+                        </td>
                         <td className="py-3 px-4 font-mono text-xs">{order.id.slice(0, 8)}...</td>
                         <td className="py-3 px-4 font-medium">{order.customer_name}</td>
                         <td className="py-3 px-4">{order.customer_phone}</td>
