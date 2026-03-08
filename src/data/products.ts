@@ -31,6 +31,13 @@ export const categories: Category[] = [
     icon: '🦐',
     description: 'Premium prawns, crabs & more',
   },
+  {
+    id: 'pickles',
+    name: 'Pickles',
+    nameTamil: 'ஊறுகாய்',
+    icon: '🫙',
+    description: 'Homemade seafood pickles from Kanyakumari',
+  },
 ];
 
 export const products: Product[] = [
@@ -154,6 +161,55 @@ export const products: Product[] = [
     isPopular: true,
     rating: 4.9,
     reviews: 312,
+  },
+  {
+    id: '8',
+    name: 'Fish Pickle',
+    nameTamil: 'மீன் ஊறுகாய்',
+    description: 'Authentic Kanyakumari-style fish pickle made with fresh seer fish, traditional spices, and gingelly oil. Perfect with rice or roti.',
+    category: 'pickles',
+    image: kingFish,
+    prices: [
+      { weight: '100g', price: 149 },
+      { weight: '250g', price: 329, originalPrice: 372 },
+      { weight: '500g', price: 599, originalPrice: 745 },
+    ],
+    inStock: true,
+    isPopular: true,
+    rating: 4.8,
+    reviews: 95,
+  },
+  {
+    id: '9',
+    name: 'Prawn Pickle',
+    nameTamil: 'இறால் ஊறுகாய்',
+    description: 'Spicy prawn pickle with hand-picked prawns and aromatic spices. A true Kanyakumari delicacy.',
+    category: 'pickles',
+    image: tigerPrawns,
+    prices: [
+      { weight: '100g', price: 179 },
+      { weight: '250g', price: 399, originalPrice: 447 },
+      { weight: '500g', price: 749, originalPrice: 895 },
+    ],
+    inStock: true,
+    rating: 4.7,
+    reviews: 68,
+  },
+  {
+    id: '10',
+    name: 'Dry Fish Pickle',
+    nameTamil: 'கருவாடு ஊறுகாய்',
+    description: 'Traditional dry fish pickle with sun-dried anchovies and fiery red chillies. A staple in every South Indian home.',
+    category: 'pickles',
+    image: dryFish,
+    prices: [
+      { weight: '100g', price: 119 },
+      { weight: '250g', price: 269, originalPrice: 297 },
+      { weight: '500g', price: 499, originalPrice: 595 },
+    ],
+    inStock: true,
+    rating: 4.6,
+    reviews: 112,
   },
 ];
 
