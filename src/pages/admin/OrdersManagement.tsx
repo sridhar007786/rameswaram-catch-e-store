@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ShoppingCart, Eye, X, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Eye, X, ChevronDown, MessageCircle, FileDown } from 'lucide-react';
+import { sendOrderConfirmation, sendStatusUpdate, sendAdminNewOrderAlert } from '@/utils/whatsapp';
+import { generateOrderPDF } from '@/utils/pdf';
 
 const ORDER_STATUSES = ['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled'];
 
