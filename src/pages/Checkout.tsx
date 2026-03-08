@@ -212,9 +212,32 @@ const CheckoutPage = () => {
                       </div>
                     ))}
                   </div>
+                  {/* Coupon Code */}
+                  <div className="border-t border-border pt-3 mb-3">
+                    {appliedCoupon ? (
+                      <div className="flex items-center justify-between bg-accent/10 rounded-lg p-3">
+                        <div className="flex items-center gap-2">
+                          <Ticket className="h-4 w-4 text-accent" />
+                          <span className="text-sm font-medium text-foreground">{appliedCoupon}</span>
+                          <span className="text-sm text-accent font-semibold">-₹{couponDiscount}</span>
+                        </div>
+                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={removeCoupon}><X className="h-3 w-3" /></Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input placeholder="Coupon code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="text-sm" />
+                        <Button type="button" variant="outline" size="sm" onClick={applyCoupon} disabled={couponLoading}>
+                          {couponLoading ? '...' : 'Apply'}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                   <div className="border-t border-border pt-3 space-y-2 mb-4">
                     <div className="flex justify-between text-sm text-muted-foreground"><span>{t('cart.subtotal')}</span><span>₹{state.total}</span></div>
                     <div className="flex justify-between text-sm text-muted-foreground"><span>{t('cart.delivery')}</span><span className={deliveryCharge === 0 ? 'text-accent font-medium' : ''}>{deliveryCharge === 0 ? t('cart.free') : `₹${deliveryCharge}`}</span></div>
+                    {couponDiscount > 0 && (
+                      <div className="flex justify-between text-sm text-accent font-medium"><span>Coupon Discount</span><span>-₹{couponDiscount}</span></div>
+                    )}
                   </div>
                   <div className="border-t border-border pt-3 mb-6">
                     <div className="flex justify-between text-foreground font-bold text-xl"><span>{t('cart.total')}</span><span>₹{grandTotal}</span></div>
