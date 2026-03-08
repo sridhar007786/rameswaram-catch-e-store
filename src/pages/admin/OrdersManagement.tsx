@@ -27,8 +27,40 @@ const OrdersManagement = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [dateFilter, setDateFilter] = useState<string>('all'); // 'all' | 'today' | 'custom'
+  const [dateFilter, setDateFilter] = useState<string>('all');
   const [customDate, setCustomDate] = useState<string>('');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredOrders.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredOrders.map(o => o.id)));
+    }
+  };
+
+  const handleDownloadSelectedLabels = () => {
+    const selected = filteredOrders.filter(o => selectedIds.has(o.id));
+    if (selected.length === 0) {
+      toast({ title: 'No orders selected', description: 'Select orders to generate labels.', variant: 'destructive' });
+      return;
+    }
+    generateDeliveryLabelsPDF(
+      selected.map((o) => ({
+        id: o.id, created_at: o.created_at, customer_name: o.customer_name,
+        customer_phone: o.customer_phone, delivery_address: o.delivery_address,
+        items: (o.items as any[]) || [], total: Number(o.total), payment_method: o.payment_method,
+      }))
+    );
+  };
 
   useEffect(() => {
     fetchOrders();
