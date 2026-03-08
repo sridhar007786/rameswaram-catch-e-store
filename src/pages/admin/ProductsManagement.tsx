@@ -84,6 +84,7 @@ const ProductsManagement = () => {
       is_popular: product.is_popular || false,
       stock_quantity: product.stock_quantity ?? 100,
       low_stock_threshold: product.low_stock_threshold ?? 10,
+      cost_price: product.cost_price ?? 0,
     });
     setEditingId(product.id);
     setShowForm(true);
