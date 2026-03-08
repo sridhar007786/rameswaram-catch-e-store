@@ -151,6 +151,7 @@ const ProductsManagement = () => {
       is_popular: form.is_popular,
       stock_quantity: form.stock_quantity,
       low_stock_threshold: form.low_stock_threshold,
+      cost_price: form.cost_price,
     };
 
     const { error } = editingId
