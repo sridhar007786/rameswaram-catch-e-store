@@ -19,6 +19,9 @@ import OrdersManagement from "./pages/admin/OrdersManagement";
 import SalesReport from "./pages/admin/SalesReport";
 import CustomerManagement from "./pages/admin/CustomerManagement";
 import StaffManagement from "./pages/admin/StaffManagement";
+import Settings from "./pages/admin/Settings";
+import ReviewsManagement from "./pages/admin/ReviewsManagement";
+import TrackingManagement from "./pages/admin/TrackingManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
