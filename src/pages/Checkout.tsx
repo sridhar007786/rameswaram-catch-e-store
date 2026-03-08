@@ -131,6 +131,24 @@ const CheckoutPage = () => {
       setOrderId(data.id);
       setOrderPlaced(true);
       toast({ title: 'Order placed successfully!' });
+
+      // WhatsApp automations
+      const orderData = {
+        id: data.id,
+        customerName: form.name,
+        customerPhone: form.phone,
+        items: orderItems,
+        subtotal: state.total,
+        deliveryCharge,
+        total: grandTotal,
+        address: `${form.address}, ${form.city} - ${form.pincode}`,
+        paymentMethod,
+      };
+      sendOrderConfirmation(orderData);
+      sendAdminNewOrderAlert({
+        ...orderData,
+        customerPhone: form.phone,
+      });
     } catch (err: any) {
       console.error('Order error:', err);
       toast({ title: 'Error', description: err.message || 'Failed to place order.', variant: 'destructive' });
