@@ -300,9 +300,32 @@ const AccountPage = () => {
                             <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                             <span className="line-clamp-1">{order.delivery_address}</span>
                           </div>
-                          <span className="text-lg font-bold text-foreground whitespace-nowrap">
-                            ₹{order.total}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1.5 text-xs"
+                              onClick={() => generateOrderPDF({
+                                id: order.id,
+                                created_at: order.created_at,
+                                customer_name: user!.user_metadata?.full_name || user!.email || '',
+                                customer_phone: profile.phone || '',
+                                customer_email: user!.email,
+                                delivery_address: order.delivery_address,
+                                items: (order.items as any[]) || [],
+                                subtotal: Number(order.total) - 0,
+                                delivery_charge: 0,
+                                total: Number(order.total),
+                                payment_method: order.payment_method,
+                                status: order.status,
+                              })}
+                            >
+                              <FileDown className="h-3.5 w-3.5" /> PDF
+                            </Button>
+                            <span className="text-lg font-bold text-foreground whitespace-nowrap">
+                              ₹{order.total}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
