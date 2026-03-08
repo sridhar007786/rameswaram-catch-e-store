@@ -85,7 +85,7 @@ const SalesReport = () => {
 
   // Top products
   const topProducts = (() => {
-    const map: Record<string, { name: string; qty: number; revenue: number }> = {};
+    const map: Record<string, { name: string; qty: number; revenue: number; cost: number }> = {};
     filtered.forEach(o => {
       ((o.items as any[]) || []).forEach((item: any) => {
         const key = item.name || 'Unknown';
