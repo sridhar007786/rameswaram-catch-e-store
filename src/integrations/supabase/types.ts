@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      order_tracking: {
+        Row: {
+          created_at: string | null
+          id: string
+          note: string | null
+          order_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          note?: string | null
+          order_id: string
+          status: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          note?: string | null
+          order_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_tracking_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
@@ -67,6 +99,42 @@ export type Database = {
           subtotal?: number
           total?: number
           updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      product_reviews: {
+        Row: {
+          created_at: string | null
+          customer_name: string
+          id: string
+          is_approved: boolean | null
+          is_featured: boolean | null
+          product_id: string
+          rating: number
+          review_text: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_name: string
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          product_id: string
+          rating: number
+          review_text?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_name?: string
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          product_id?: string
+          rating?: number
+          review_text?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -152,6 +220,27 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      store_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string | null
+          value: string | null
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string | null
+          value?: string | null
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: string | null
         }
         Relationships: []
       }
