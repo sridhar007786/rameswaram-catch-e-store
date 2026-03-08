@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Navigate, Link } from 'react-router-dom';
-import { User, Package, MapPin, LogOut, ChevronRight, Phone, Mail, Edit2, Save, X, Clock, CheckCircle, Truck as TruckIcon, Box } from 'lucide-react';
+import { User, Package, MapPin, LogOut, ChevronRight, Phone, Mail, Edit2, Save, X, Clock, CheckCircle, Truck as TruckIcon, Box, FileDown } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { generateOrderPDF } from '@/utils/pdf';
 
 interface Order {
   id: string;
