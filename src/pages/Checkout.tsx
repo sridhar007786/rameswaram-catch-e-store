@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, Banknote, MessageCircle, CheckCircle, MapPin } from 'lucide-react';
+import { sendAdminNewOrderAlert, sendOrderConfirmation } from '@/utils/whatsapp';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
