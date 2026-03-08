@@ -23,6 +23,7 @@ import StaffManagement from "./pages/admin/StaffManagement";
 import Settings from "./pages/admin/Settings";
 import ReviewsManagement from "./pages/admin/ReviewsManagement";
 import TrackingManagement from "./pages/admin/TrackingManagement";
+import CouponsManagement from "./pages/admin/CouponsManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/admin/settings" element={<Settings />} />
               <Route path="/admin/reviews" element={<ReviewsManagement />} />
               <Route path="/admin/tracking" element={<TrackingManagement />} />
+              <Route path="/admin/coupons" element={<CouponsManagement />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

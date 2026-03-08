@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CreditCard, Banknote, MessageCircle, CheckCircle, MapPin } from 'lucide-react';
+import { ArrowLeft, CreditCard, Banknote, MessageCircle, CheckCircle, MapPin, Ticket, X } from 'lucide-react';
 import { sendAdminNewOrderAlert, sendOrderConfirmation } from '@/utils/whatsapp';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -26,9 +26,51 @@ const CheckoutPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState('');
+  const [couponCode, setCouponCode] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const deliveryCharge = state.total >= 500 ? 0 : 50;
-  const grandTotal = state.total + deliveryCharge;
+  const grandTotal = state.total + deliveryCharge - couponDiscount;
+
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    try {
+      const { data, error } = await supabase.from('coupons').select('*')
+        .eq('code', couponCode.toUpperCase().trim()).eq('is_active', true).maybeSingle();
+      if (error || !data) {
+        toast({ title: t('common.error'), description: 'Invalid or expired coupon code.', variant: 'destructive' });
+        setCouponLoading(false); return;
+      }
+      const coupon = data as any;
+      if (coupon.expires_at && new Date(coupon.expires_at) < new Date()) {
+        toast({ title: t('common.error'), description: 'This coupon has expired.', variant: 'destructive' });
+        setCouponLoading(false); return;
+      }
+      if (coupon.usage_limit && coupon.used_count >= coupon.usage_limit) {
+        toast({ title: t('common.error'), description: 'Coupon usage limit reached.', variant: 'destructive' });
+        setCouponLoading(false); return;
+      }
+      if (state.total < (coupon.min_order_amount || 0)) {
+        toast({ title: t('common.error'), description: `Minimum order ₹${coupon.min_order_amount} required.`, variant: 'destructive' });
+        setCouponLoading(false); return;
+      }
+      let discount = coupon.discount_type === 'percentage'
+        ? (state.total * coupon.discount_value) / 100
+        : coupon.discount_value;
+      if (coupon.max_discount && discount > coupon.max_discount) discount = coupon.max_discount;
+      setCouponDiscount(Math.round(discount));
+      setAppliedCoupon(coupon.code);
+      toast({ title: 'Coupon Applied!', description: `You saved ₹${Math.round(discount)}` });
+    } catch { toast({ title: t('common.error'), description: 'Failed to apply coupon.', variant: 'destructive' }); }
+    setCouponLoading(false);
+  };
+
+  const removeCoupon = () => {
+    setCouponDiscount(0); setAppliedCoupon(null); setCouponCode('');
+  };
 
   if (state.items.length === 0 && !orderPlaced) {
     return (
@@ -95,6 +137,10 @@ const CheckoutPage = () => {
         payment_status: 'pending', notes: form.notes || null,
       } as any).select().single();
       if (error) throw error;
+      // Increment coupon usage
+      if (appliedCoupon) {
+        await supabase.rpc('increment_coupon_usage' as any, { coupon_code: appliedCoupon });
+      }
       clearCart();
       setOrderId(data.id);
       setOrderPlaced(true);
@@ -170,9 +216,32 @@ const CheckoutPage = () => {
                       </div>
                     ))}
                   </div>
+                  {/* Coupon Code */}
+                  <div className="border-t border-border pt-3 mb-3">
+                    {appliedCoupon ? (
+                      <div className="flex items-center justify-between bg-accent/10 rounded-lg p-3">
+                        <div className="flex items-center gap-2">
+                          <Ticket className="h-4 w-4 text-accent" />
+                          <span className="text-sm font-medium text-foreground">{appliedCoupon}</span>
+                          <span className="text-sm text-accent font-semibold">-₹{couponDiscount}</span>
+                        </div>
+                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={removeCoupon}><X className="h-3 w-3" /></Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input placeholder="Coupon code" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="text-sm" />
+                        <Button type="button" variant="outline" size="sm" onClick={applyCoupon} disabled={couponLoading}>
+                          {couponLoading ? '...' : 'Apply'}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                   <div className="border-t border-border pt-3 space-y-2 mb-4">
                     <div className="flex justify-between text-sm text-muted-foreground"><span>{t('cart.subtotal')}</span><span>₹{state.total}</span></div>
                     <div className="flex justify-between text-sm text-muted-foreground"><span>{t('cart.delivery')}</span><span className={deliveryCharge === 0 ? 'text-accent font-medium' : ''}>{deliveryCharge === 0 ? t('cart.free') : `₹${deliveryCharge}`}</span></div>
+                    {couponDiscount > 0 && (
+                      <div className="flex justify-between text-sm text-accent font-medium"><span>Coupon Discount</span><span>-₹{couponDiscount}</span></div>
+                    )}
                   </div>
                   <div className="border-t border-border pt-3 mb-6">
                     <div className="flex justify-between text-foreground font-bold text-xl"><span>{t('cart.total')}</span><span>₹{grandTotal}</span></div>

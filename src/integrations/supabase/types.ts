@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      coupons: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          max_discount: number | null
+          min_order_amount: number | null
+          updated_at: string
+          usage_limit: number | null
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_discount?: number | null
+          min_order_amount?: number | null
+          updated_at?: string
+          usage_limit?: number | null
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_discount?: number | null
+          min_order_amount?: number | null
+          updated_at?: string
+          usage_limit?: number | null
+          used_count?: number
+        }
+        Relationships: []
+      }
       order_tracking: {
         Row: {
           created_at: string | null
@@ -150,11 +198,13 @@ export type Database = {
           in_stock: boolean
           is_fresh: boolean | null
           is_popular: boolean | null
+          low_stock_threshold: number | null
           name: string
           name_tamil: string | null
           prices: Json
           rating: number | null
           reviews_count: number | null
+          stock_quantity: number | null
           updated_at: string
         }
         Insert: {
@@ -167,11 +217,13 @@ export type Database = {
           in_stock?: boolean
           is_fresh?: boolean | null
           is_popular?: boolean | null
+          low_stock_threshold?: number | null
           name: string
           name_tamil?: string | null
           prices?: Json
           rating?: number | null
           reviews_count?: number | null
+          stock_quantity?: number | null
           updated_at?: string
         }
         Update: {
@@ -184,11 +236,13 @@ export type Database = {
           in_stock?: boolean
           is_fresh?: boolean | null
           is_popular?: boolean | null
+          low_stock_threshold?: number | null
           name?: string
           name_tamil?: string | null
           prices?: Json
           rating?: number | null
           reviews_count?: number | null
+          stock_quantity?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -273,6 +327,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_coupon_usage: {
+        Args: { coupon_code: string }
+        Returns: undefined
       }
     }
     Enums: {
