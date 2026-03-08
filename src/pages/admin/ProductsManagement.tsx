@@ -44,6 +44,7 @@ const emptyForm: ProductForm = {
   is_popular: false,
   stock_quantity: 100,
   low_stock_threshold: 10,
+  cost_price: 0,
 };
 
 const ProductsManagement = () => {
