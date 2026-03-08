@@ -1,4 +1,5 @@
 import { categories } from '@/data/products';
+import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
 
 interface CategoryFilterProps {
@@ -7,6 +8,18 @@ interface CategoryFilterProps {
 }
 
 export const CategoryFilter = ({ selectedCategory, onSelectCategory }: CategoryFilterProps) => {
+  const { t, language } = useLanguage();
+
+  const getCategoryName = (cat: typeof categories[0]) => {
+    if (language === 'ta') return cat.nameTamil;
+    if (language === 'hi') {
+      const key = `category.${cat.id.replace('-', '_')}`;
+      const translated = t(key);
+      return translated !== key ? translated : cat.name;
+    }
+    return cat.name;
+  };
+
   return (
     <div className="flex flex-wrap gap-3">
       <button
@@ -19,7 +32,7 @@ export const CategoryFilter = ({ selectedCategory, onSelectCategory }: CategoryF
         )}
       >
         <span className="text-lg">🌊</span>
-        All Products
+        {t('products.all')}
       </button>
       
       {categories.map((category) => (
@@ -34,7 +47,7 @@ export const CategoryFilter = ({ selectedCategory, onSelectCategory }: CategoryF
           )}
         >
           <span className="text-lg">{category.icon}</span>
-          {category.name}
+          {getCategoryName(category)}
         </button>
       ))}
     </div>
