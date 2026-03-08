@@ -28,6 +28,7 @@ interface ProductForm {
   is_popular: boolean;
   stock_quantity: number;
   low_stock_threshold: number;
+  cost_price: number;
 }
 
 const emptyForm: ProductForm = {
@@ -43,6 +44,7 @@ const emptyForm: ProductForm = {
   is_popular: false,
   stock_quantity: 100,
   low_stock_threshold: 10,
+  cost_price: 0,
 };
 
 const ProductsManagement = () => {
@@ -82,6 +84,7 @@ const ProductsManagement = () => {
       is_popular: product.is_popular || false,
       stock_quantity: product.stock_quantity ?? 100,
       low_stock_threshold: product.low_stock_threshold ?? 10,
+      cost_price: product.cost_price ?? 0,
     });
     setEditingId(product.id);
     setShowForm(true);
@@ -148,6 +151,7 @@ const ProductsManagement = () => {
       is_popular: form.is_popular,
       stock_quantity: form.stock_quantity,
       low_stock_threshold: form.low_stock_threshold,
+      cost_price: form.cost_price,
     };
 
     const { error } = editingId
@@ -291,6 +295,36 @@ const ProductsManagement = () => {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Cost Price (₹) — Making/Purchase Cost</Label>
+                  <Input type="number" value={form.cost_price} onChange={e => setForm({ ...form, cost_price: Number(e.target.value) })} placeholder="0" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Estimated Profit Margin</Label>
+                  <div className="px-3 py-2 rounded-lg border border-border bg-muted/50 text-sm">
+                    {form.cost_price > 0 && form.prices.length > 0 ? (
+                      <div className="space-y-1">
+                        {form.prices.filter(p => p.price > 0).map((p, i) => {
+                          const margin = ((p.price - form.cost_price) / p.price * 100);
+                          const profit = p.price - form.cost_price;
+                          return (
+                            <div key={i} className="flex justify-between">
+                              <span className="text-muted-foreground">{p.weight}:</span>
+                              <span className={margin > 0 ? 'text-green-600 font-medium' : 'text-destructive font-medium'}>
+                                ₹{profit.toFixed(0)} ({margin.toFixed(1)}%)
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">Enter cost price and selling prices to see margins</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Multi-image upload */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -411,6 +445,8 @@ const ProductsManagement = () => {
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Category</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Images</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Price Range</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Cost</th>
+                      <th className="text-left py-3 px-4 font-medium text-muted-foreground">Margin</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Stock</th>
                       <th className="text-left py-3 px-4 font-medium text-muted-foreground">Status</th>
                       <th className="text-right py-3 px-4 font-medium text-muted-foreground">Actions</th>
@@ -448,6 +484,14 @@ const ProductsManagement = () => {
                             <Badge variant="outline">{imgCount} {imgCount === 1 ? 'image' : 'images'}</Badge>
                           </td>
                           <td className="py-3 px-4 font-medium">₹{minPrice} - ₹{maxPrice}</td>
+                          <td className="py-3 px-4 text-muted-foreground">₹{product.cost_price ?? 0}</td>
+                          <td className="py-3 px-4">
+                            {(product.cost_price ?? 0) > 0 && minPrice > 0 ? (
+                              <span className={`font-medium ${((minPrice - (product.cost_price ?? 0)) / minPrice * 100) > 20 ? 'text-green-600' : 'text-amber-600'}`}>
+                                {((minPrice - (product.cost_price ?? 0)) / minPrice * 100).toFixed(0)}%
+                              </span>
+                            ) : <span className="text-muted-foreground">—</span>}
+                          </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-1.5">
                               <span className={`font-medium ${isLowStock ? 'text-destructive' : 'text-foreground'}`}>{stockQty}</span>

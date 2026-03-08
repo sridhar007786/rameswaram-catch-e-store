@@ -10,16 +10,21 @@ const COLORS = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondar
 
 const SalesReport = () => {
   const [orders, setOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
 
   useEffect(() => {
-    fetchOrders();
+    fetchData();
   }, []);
 
-  const fetchOrders = async () => {
-    const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: true });
-    setOrders(data || []);
+  const fetchData = async () => {
+    const [ordersRes, productsRes] = await Promise.all([
+      supabase.from('orders').select('*').order('created_at', { ascending: true }),
+      supabase.from('products').select('id, name, cost_price, prices'),
+    ]);
+    setOrders(ordersRes.data || []);
+    setProducts(productsRes.data || []);
     setLoading(false);
   };
 
@@ -36,6 +41,20 @@ const SalesReport = () => {
   const totalOrders = filtered.length;
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
   const deliveredOrders = filtered.filter(o => o.status === 'delivered').length;
+
+  // Build cost lookup by product name
+  const costMap: Record<string, number> = {};
+  products.forEach(p => { if (p.name) costMap[p.name] = Number(p.cost_price || 0); });
+
+  // Calculate total cost and profit
+  const totalCost = filtered.reduce((sum, o) => {
+    return sum + ((o.items as any[]) || []).reduce((s, item: any) => {
+      const cost = costMap[item.name] || 0;
+      return s + cost * (item.quantity || 1);
+    }, 0);
+  }, 0);
+  const totalProfit = totalRevenue - totalCost;
+  const profitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
 
   // Daily revenue chart
   const dailyData = (() => {
@@ -66,13 +85,14 @@ const SalesReport = () => {
 
   // Top products
   const topProducts = (() => {
-    const map: Record<string, { name: string; qty: number; revenue: number }> = {};
+    const map: Record<string, { name: string; qty: number; revenue: number; cost: number }> = {};
     filtered.forEach(o => {
       ((o.items as any[]) || []).forEach((item: any) => {
         const key = item.name || 'Unknown';
-        if (!map[key]) map[key] = { name: key, qty: 0, revenue: 0 };
+        if (!map[key]) map[key] = { name: key, qty: 0, revenue: 0, cost: 0 };
         map[key].qty += item.quantity || 1;
-        map[key].revenue += (item.price || 0) * (item.quantity || 1);
+                        map[key].revenue += (item.price || 0) * (item.quantity || 1);
+        map[key].cost = costMap[key] || 0;
       });
     });
     return Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
@@ -124,12 +144,14 @@ const SalesReport = () => {
         ) : (
           <>
             {/* Summary cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               {[
                 { title: 'Total Revenue', value: `₹${totalRevenue.toLocaleString()}`, icon: IndianRupee, color: 'text-green-600' },
-                { title: 'Total Orders', value: totalOrders, icon: TrendingUp, color: 'text-primary' },
+                { title: 'Total Cost', value: `₹${Math.round(totalCost).toLocaleString()}`, icon: IndianRupee, color: 'text-destructive' },
+                { title: 'Total Profit', value: `₹${Math.round(totalProfit).toLocaleString()}`, icon: TrendingUp, color: totalProfit >= 0 ? 'text-green-600' : 'text-destructive' },
+                { title: 'Profit Margin', value: `${profitMargin.toFixed(1)}%`, icon: TrendingUp, color: profitMargin >= 20 ? 'text-green-600' : 'text-amber-500' },
+                { title: 'Total Orders', value: totalOrders, icon: Calendar, color: 'text-primary' },
                 { title: 'Avg Order Value', value: `₹${Math.round(avgOrderValue).toLocaleString()}`, icon: Calendar, color: 'text-accent' },
-                { title: 'Delivered', value: deliveredOrders, icon: TrendingUp, color: 'text-green-600' },
               ].map(c => (
                 <Card key={c.title}>
                   <CardContent className="p-4 sm:p-6">
@@ -219,6 +241,9 @@ const SalesReport = () => {
                           <th className="text-left py-3 px-4 font-medium text-muted-foreground">Product</th>
                           <th className="text-left py-3 px-4 font-medium text-muted-foreground">Qty Sold</th>
                           <th className="text-right py-3 px-4 font-medium text-muted-foreground">Revenue</th>
+                          <th className="text-right py-3 px-4 font-medium text-muted-foreground">Cost</th>
+                          <th className="text-right py-3 px-4 font-medium text-muted-foreground">Profit</th>
+                          <th className="text-right py-3 px-4 font-medium text-muted-foreground">Margin</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -228,6 +253,19 @@ const SalesReport = () => {
                             <td className="py-3 px-4 font-medium">{p.name}</td>
                             <td className="py-3 px-4">{p.qty}</td>
                             <td className="py-3 px-4 text-right font-semibold">₹{p.revenue.toLocaleString()}</td>
+                            <td className="py-3 px-4 text-right text-muted-foreground">₹{(p.cost * p.qty).toLocaleString()}</td>
+                            <td className="py-3 px-4 text-right font-semibold">
+                              <span className={p.revenue - p.cost * p.qty >= 0 ? 'text-green-600' : 'text-destructive'}>
+                                ₹{(p.revenue - p.cost * p.qty).toLocaleString()}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              {p.revenue > 0 ? (
+                                <span className={((p.revenue - p.cost * p.qty) / p.revenue * 100) >= 20 ? 'text-green-600 font-medium' : 'text-amber-600 font-medium'}>
+                                  {((p.revenue - p.cost * p.qty) / p.revenue * 100).toFixed(1)}%
+                                </span>
+                              ) : '—'}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
