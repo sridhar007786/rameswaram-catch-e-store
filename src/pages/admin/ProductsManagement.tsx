@@ -295,6 +295,36 @@ const ProductsManagement = () => {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Cost Price (₹) — Making/Purchase Cost</Label>
+                  <Input type="number" value={form.cost_price} onChange={e => setForm({ ...form, cost_price: Number(e.target.value) })} placeholder="0" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Estimated Profit Margin</Label>
+                  <div className="px-3 py-2 rounded-lg border border-border bg-muted/50 text-sm">
+                    {form.cost_price > 0 && form.prices.length > 0 ? (
+                      <div className="space-y-1">
+                        {form.prices.filter(p => p.price > 0).map((p, i) => {
+                          const margin = ((p.price - form.cost_price) / p.price * 100);
+                          const profit = p.price - form.cost_price;
+                          return (
+                            <div key={i} className="flex justify-between">
+                              <span className="text-muted-foreground">{p.weight}:</span>
+                              <span className={margin > 0 ? 'text-green-600 font-medium' : 'text-destructive font-medium'}>
+                                ₹{profit.toFixed(0)} ({margin.toFixed(1)}%)
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">Enter cost price and selling prices to see margins</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Multi-image upload */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
