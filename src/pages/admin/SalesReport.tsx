@@ -42,6 +42,20 @@ const SalesReport = () => {
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
   const deliveredOrders = filtered.filter(o => o.status === 'delivered').length;
 
+  // Build cost lookup by product name
+  const costMap: Record<string, number> = {};
+  products.forEach(p => { if (p.name) costMap[p.name] = Number(p.cost_price || 0); });
+
+  // Calculate total cost and profit
+  const totalCost = filtered.reduce((sum, o) => {
+    return sum + ((o.items as any[]) || []).reduce((s, item: any) => {
+      const cost = costMap[item.name] || 0;
+      return s + cost * (item.quantity || 1);
+    }, 0);
+  }, 0);
+  const totalProfit = totalRevenue - totalCost;
+  const profitMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
+
   // Daily revenue chart
   const dailyData = (() => {
     const map: Record<string, number> = {};
