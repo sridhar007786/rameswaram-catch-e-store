@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Package, ShoppingCart, DollarSign, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Package, ShoppingCart, DollarSign, Clock, TrendingUp, AlertTriangle, PlusCircle, Store, Smartphone, Phone, MessageCircle, Globe } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface DashboardStats {
@@ -31,6 +33,7 @@ const Dashboard = () => {
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [lowStockProducts, setLowStockProducts] = useState<LowStockProduct[]>([]);
   const [weeklyRevenue, setWeeklyRevenue] = useState<{ day: string; revenue: number }[]>([]);
+  const [sourceBreakdown, setSourceBreakdown] = useState<Record<string, { count: number; revenue: number }>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -78,6 +81,16 @@ const Dashboard = () => {
         last7Days.push({ day: dayLabel, revenue: Math.round(dayRevenue) });
       }
       setWeeklyRevenue(last7Days);
+
+      // Order source breakdown
+      const breakdown: Record<string, { count: number; revenue: number }> = {};
+      orders.forEach((o: any) => {
+        const src = o.order_source || 'online';
+        if (!breakdown[src]) breakdown[src] = { count: 0, revenue: 0 };
+        breakdown[src].count += 1;
+        breakdown[src].revenue += Number(o.total || 0);
+      });
+      setSourceBreakdown(breakdown);
 
       setStats({
         totalProducts: products.length, totalOrders: orders.length, totalRevenue,
