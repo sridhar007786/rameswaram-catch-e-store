@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, LogOut, Fish, Menu, X, BarChart3, Users, Shield, Settings, MessageSquare, MapPin, Ticket } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, LogOut, Fish, Menu, X, BarChart3, Users, Shield, Settings, MessageSquare, MapPin, Ticket, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,7 @@ const navItems = [
   { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
   { name: 'Products', path: '/admin/products', icon: Package },
   { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
+  { name: 'New Manual Order', path: '/admin/orders/new', icon: PlusCircle },
   { name: 'Tracking', path: '/admin/tracking', icon: MapPin },
   { name: 'Coupons', path: '/admin/coupons', icon: Ticket },
   { name: 'Sales Report', path: '/admin/sales', icon: BarChart3 },
