@@ -129,7 +129,14 @@ const Dashboard = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <h2 className="font-display text-2xl font-bold text-foreground">Dashboard Overview</h2>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <h2 className="font-display text-2xl font-bold text-foreground">Dashboard Overview</h2>
+          <Link to="/admin/orders/new">
+            <Button className="gap-2">
+              <PlusCircle className="h-4 w-4" /> New Manual Order
+            </Button>
+          </Link>
+        </div>
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -159,6 +166,42 @@ const Dashboard = () => {
                 </Card>
               ))}
             </div>
+
+            {/* Order source breakdown */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Store className="h-5 w-5 text-primary" /> Orders by Source
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {Object.keys(sourceBreakdown).length === 0 ? (
+                  <p className="text-muted-foreground text-center py-4 text-sm">No orders yet.</p>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    {[
+                      { key: 'offline', label: 'Walk-in', icon: Store, color: 'text-blue-600 bg-blue-50' },
+                      { key: 'social', label: 'Social', icon: Smartphone, color: 'text-pink-600 bg-pink-50' },
+                      { key: 'phone', label: 'Phone', icon: Phone, color: 'text-amber-600 bg-amber-50' },
+                      { key: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: 'text-green-600 bg-green-50' },
+                      { key: 'online', label: 'Online', icon: Globe, color: 'text-purple-600 bg-purple-50' },
+                    ].map((s) => {
+                      const data = sourceBreakdown[s.key] || { count: 0, revenue: 0 };
+                      return (
+                        <div key={s.key} className="p-3 rounded-lg bg-muted/50 text-center">
+                          <div className={`w-9 h-9 mx-auto rounded-lg flex items-center justify-center mb-2 ${s.color}`}>
+                            <s.icon className="h-4 w-4" />
+                          </div>
+                          <p className="text-xs text-muted-foreground">{s.label}</p>
+                          <p className="text-lg font-bold text-foreground">{data.count}</p>
+                          <p className="text-xs text-muted-foreground">₹{data.revenue.toLocaleString()}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Weekly Revenue Chart */}
