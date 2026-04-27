@@ -1,9 +1,13 @@
 import { MessageCircle } from 'lucide-react';
+import { useStoreSettings, waNumber } from '@/hooks/useStoreSettings';
 
 export const WhatsAppButton = () => {
-  const phoneNumber = '919876543210';
-  const message = encodeURIComponent('Hi! I would like to order fresh seafood from Meenava Sonthangal, Kanyakumari.');
+  const { settings } = useStoreSettings();
+  const phoneNumber = waNumber(settings.whatsapp_number || settings.store_phone);
+  const message = encodeURIComponent(`Hi! I would like to order fresh seafood from ${settings.store_name}.`);
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+
+  if (!phoneNumber) return null;
 
   return (
     <a

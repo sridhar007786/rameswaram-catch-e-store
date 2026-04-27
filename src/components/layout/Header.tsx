@@ -6,6 +6,7 @@ import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/context/LanguageContext';
 import { cn } from '@/lib/utils';
+import { useStoreSettings, cleanPhone } from '@/hooks/useStoreSettings';
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +16,8 @@ export const Header = () => {
   const { state } = useCart();
   const { user, isAdmin, signOut } = useAuth();
   const { language, setLanguage, t, languages } = useLanguage();
+  const { settings } = useStoreSettings();
+  const telHref = `tel:${cleanPhone(settings.store_phone)}`;
 
   const isHome = location.pathname === '/';
 
@@ -56,7 +59,7 @@ export const Header = () => {
             </div>
             <div className="min-w-0">
               <h1 className="text-white font-display text-sm sm:text-lg md:text-xl font-bold leading-tight truncate">
-                Meenava Sonthangal
+                {settings.store_name}
               </h1>
               <p className="text-white/70 text-[10px] sm:text-xs hidden xs:block">Kanyakumari Seafoods</p>
             </div>
@@ -146,7 +149,7 @@ export const Header = () => {
               </Button>
             </Link>
 
-            <a href="tel:+919876543210" className="hidden md:block">
+            <a href={telHref} className="hidden md:block">
               <Button variant="hero" size="sm" className="gap-2">
                 <Phone className="h-4 w-4" />
                 {t('nav.order_now')}
@@ -207,7 +210,7 @@ export const Header = () => {
                 </Link>
               )}
 
-              <a href="tel:+919876543210" className="mt-2">
+              <a href={telHref} className="mt-2">
                 <Button variant="cta" className="w-full gap-2">
                   <Phone className="h-4 w-4" /> {t('nav.order_now')}
                 </Button>

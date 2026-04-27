@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Instagram, Facebook, Youtube } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useStoreSettings, cleanPhone } from '@/hooks/useStoreSettings';
 
 export const Footer = () => {
   const { t } = useLanguage();
+  const { settings } = useStoreSettings();
 
   return (
     <footer className="bg-primary text-white">
@@ -16,7 +18,7 @@ export const Footer = () => {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-2xl">🐟</div>
               <div>
-                <h3 className="font-display text-xl font-bold">Meenava Sonthangal</h3>
+                <h3 className="font-display text-xl font-bold">{settings.store_name}</h3>
                 <p className="text-white/70 text-sm">Kanyakumari Seafoods</p>
               </div>
             </div>
@@ -77,18 +79,18 @@ export const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
-                <span className="text-white/70 text-sm">Beach Road, Kanyakumari, Tamil Nadu 629702</span>
+                <span className="text-white/70 text-sm">{settings.store_address}</span>
               </li>
               <li>
-                <a href="tel:+919876543210" className="flex items-center gap-3 text-white/70 hover:text-white transition-colors">
+                <a href={`tel:${cleanPhone(settings.store_phone)}`} className="flex items-center gap-3 text-white/70 hover:text-white transition-colors">
                   <Phone className="h-5 w-5 text-secondary" />
-                  <span className="text-sm">+91 98765 43210</span>
+                  <span className="text-sm">{settings.store_phone}</span>
                 </a>
               </li>
               <li>
-                <a href="mailto:order@meenavasonthangal.com" className="flex items-center gap-3 text-white/70 hover:text-white transition-colors">
+                <a href={`mailto:${settings.store_email}`} className="flex items-center gap-3 text-white/70 hover:text-white transition-colors">
                   <Mail className="h-5 w-5 text-secondary" />
-                  <span className="text-sm">order@meenavasonthangal.com</span>
+                  <span className="text-sm">{settings.store_email}</span>
                 </a>
               </li>
             </ul>
