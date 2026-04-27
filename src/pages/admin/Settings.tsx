@@ -8,10 +8,12 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import { Save, Store, Bell, MessageSquare } from 'lucide-react';
 
 const Settings = () => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<Record<string, string>>({});
@@ -34,11 +36,18 @@ const Settings = () => {
 
   const handleSave = async () => {
     setSaving(true);
-    const updates = Object.entries(settings).map(([key, value]) =>
-      supabase.from('store_settings').update({ value, updated_at: new Date().toISOString() }).eq('key', key)
-    );
-    await Promise.all(updates);
-    toast({ title: 'Settings saved', description: 'All settings have been updated.' });
+    const rows = Object.entries(settings).map(([key, value]) => ({
+      key,
+      value,
+      updated_at: new Date().toISOString(),
+    }));
+    const { error } = await supabase.from('store_settings').upsert(rows, { onConflict: 'key' });
+    if (error) {
+      toast({ title: 'Save failed', description: error.message, variant: 'destructive' });
+    } else {
+      await queryClient.invalidateQueries({ queryKey: ['store_settings'] });
+      toast({ title: 'Settings saved', description: 'Live site updated instantly.' });
+    }
     setSaving(false);
   };
 

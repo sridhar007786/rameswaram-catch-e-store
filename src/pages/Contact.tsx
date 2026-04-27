@@ -2,9 +2,13 @@ import { Phone, Mail, MapPin, Clock, MessageCircle } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/context/LanguageContext';
+import { useStoreSettings, cleanPhone, waNumber } from '@/hooks/useStoreSettings';
 
 const ContactPage = () => {
   const { t } = useLanguage();
+  const { settings } = useStoreSettings();
+  const wa = waNumber(settings.whatsapp_number || settings.store_phone);
+  const waLink = `https://wa.me/${wa}?text=${encodeURIComponent('Hi! I would like to order fresh seafood.')}`;
 
   return (
     <Layout>
@@ -20,17 +24,16 @@ const ContactPage = () => {
               <div className="bg-card rounded-2xl p-8 shadow-ocean">
                 <h2 className="font-display text-2xl font-semibold text-foreground mb-6">{t('contact.get_in_touch')}</h2>
                 <div className="space-y-6">
-                  <a href="tel:+919876543210" className="flex items-start gap-4 group">
+                  <a href={`tel:${cleanPhone(settings.store_phone)}`} className="flex items-start gap-4 group">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
                       <Phone className="h-5 w-5 text-primary group-hover:text-white" />
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">{t('contact.phone')}</p>
-                      <p className="text-muted-foreground">+91 98765 43210</p>
-                      <p className="text-muted-foreground">+91 98765 43211</p>
+                      <p className="text-muted-foreground">{settings.store_phone}</p>
                     </div>
                   </a>
-                  <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 group">
+                  <a href={waLink} target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 group">
                     <div className="w-12 h-12 rounded-xl bg-[#25D366]/10 flex items-center justify-center group-hover:bg-[#25D366] transition-colors">
                       <MessageCircle className="h-5 w-5 text-[#25D366] group-hover:text-white" />
                     </div>
@@ -39,13 +42,13 @@ const ContactPage = () => {
                       <p className="text-muted-foreground">{t('contact.chat_directly')}</p>
                     </div>
                   </a>
-                  <a href="mailto:order@meenavasonthangal.com" className="flex items-start gap-4 group">
+                  <a href={`mailto:${settings.store_email}`} className="flex items-start gap-4 group">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
                       <Mail className="h-5 w-5 text-primary group-hover:text-white" />
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">{t('contact.email')}</p>
-                      <p className="text-muted-foreground">order@meenavasonthangal.com</p>
+                      <p className="text-muted-foreground">{settings.store_email}</p>
                     </div>
                   </a>
                   <div className="flex items-start gap-4">
@@ -54,7 +57,7 @@ const ContactPage = () => {
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">{t('contact.address')}</p>
-                      <p className="text-muted-foreground">Beach Road,<br />Kanyakumari, Tamil Nadu 629702</p>
+                      <p className="text-muted-foreground whitespace-pre-line">{settings.store_address}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -71,7 +74,7 @@ const ContactPage = () => {
               <div className="bg-ocean-gradient rounded-2xl p-8 text-white">
                 <h3 className="font-display text-xl font-semibold mb-4">{t('contact.quick_order')}</h3>
                 <p className="text-white/80 mb-6">{t('contact.quick_order_desc')}</p>
-                <a href="https://wa.me/919876543210?text=Hi!%20I%20would%20like%20to%20order%20fresh%20seafood." target="_blank" rel="noopener noreferrer">
+                <a href={waLink} target="_blank" rel="noopener noreferrer">
                   <Button variant="hero" className="w-full">
                     <MessageCircle className="h-5 w-5" />
                     {t('contact.start_chat')}
