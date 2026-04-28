@@ -3,20 +3,21 @@ import { useSearchParams } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { ProductGrid } from '@/components/products/ProductGrid';
 import { CategoryFilter } from '@/components/products/CategoryFilter';
-import { products, getProductsByCategory } from '@/data/products';
 import { Product } from '@/types/product';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useProducts } from '@/hooks/useProducts';
 
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get('category'));
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const { t } = useLanguage();
+  const { data: products = [], isLoading } = useProducts();
 
   useEffect(() => {
-    let result = selectedCategory ? getProductsByCategory(selectedCategory) : products;
+    let result = selectedCategory ? products.filter((p) => p.category === selectedCategory) : products;
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
@@ -24,7 +25,7 @@ const ProductsPage = () => {
       );
     }
     setFilteredProducts(result);
-  }, [selectedCategory, searchQuery]);
+  }, [selectedCategory, searchQuery, products]);
 
   const handleCategoryChange = (categoryId: string | null) => {
     setSelectedCategory(categoryId);
@@ -64,7 +65,11 @@ const ProductsPage = () => {
             </p>
           </div>
 
-          <ProductGrid products={filteredProducts} />
+          {isLoading ? (
+            <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+          ) : (
+            <ProductGrid products={filteredProducts} />
+          )}
         </div>
       </div>
     </Layout>

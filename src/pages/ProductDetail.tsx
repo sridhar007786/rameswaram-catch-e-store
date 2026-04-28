@@ -5,13 +5,14 @@ import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { products } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductGrid } from '@/components/products/ProductGrid';
+import { Loader2 } from 'lucide-react';
 
 interface Review {
   id: string;
@@ -29,6 +30,7 @@ const ProductDetail = () => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
 
+  const { data: products = [], isLoading } = useProducts();
   const product = products.find((p) => p.id === id);
   const [selectedPriceIndex, setSelectedPriceIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -53,6 +55,16 @@ const ProductDetail = () => {
     setReviews((data as Review[]) || []);
   };
 
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="pt-24 pb-20 min-h-screen bg-background flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
+    );
+  }
+
   if (!product) {
     return (
       <Layout>
@@ -73,6 +85,10 @@ const ProductDetail = () => {
   const relatedProducts = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
 
   const handleAddToCart = () => {
+    if (!product.inStock) {
+      toast({ title: t('products.out_of_stock'), description: t('products.out_of_stock'), variant: 'destructive' });
+      return;
+    }
     for (let i = 0; i < quantity; i++) addItem(product, selectedPrice.weight, selectedPrice.price);
     toast({ title: t('products.added_to_cart'), description: `${quantity}x ${product.name} (${selectedPrice.weight})` });
   };
@@ -181,16 +197,22 @@ const ProductDetail = () => {
                 <span className="text-4xl font-bold text-foreground">₹{selectedPrice.price}</span>
                 {selectedPrice.originalPrice && <span className="text-xl text-muted-foreground line-through">₹{selectedPrice.originalPrice}</span>}
                 {discount > 0 && <Badge variant="offer" className="text-sm">{t('detail.save_off')} {discount}%</Badge>}
+                {product.inStock ? (
+                  <Badge variant="fresh" className="text-sm">✓ {t('products.in_stock') || 'In Stock'}</Badge>
+                ) : (
+                  <Badge variant="outOfStock" className="text-sm">{t('products.out_of_stock')}</Badge>
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-center gap-3 bg-muted rounded-xl px-4 py-2">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors"><Minus className="h-4 w-4" /></button>
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={!product.inStock} className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors disabled:opacity-50"><Minus className="h-4 w-4" /></button>
                   <span className="w-8 text-center font-bold text-lg">{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)} className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors"><Plus className="h-4 w-4" /></button>
+                  <button onClick={() => setQuantity(quantity + 1)} disabled={!product.inStock} className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors disabled:opacity-50"><Plus className="h-4 w-4" /></button>
                 </div>
                 <Button variant="cta" size="xl" className="flex-1 gap-2" onClick={handleAddToCart} disabled={!product.inStock}>
-                  <ShoppingCart className="h-5 w-5" />{t('detail.add_to_cart')} — ₹{selectedPrice.price * quantity}
+                  <ShoppingCart className="h-5 w-5" />
+                  {product.inStock ? `${t('detail.add_to_cart')} — ₹${selectedPrice.price * quantity}` : t('products.out_of_stock')}
                 </Button>
                 <Button variant="outline" size="icon" className="shrink-0 h-14 w-14"><Heart className="h-5 w-5" /></Button>
               </div>
