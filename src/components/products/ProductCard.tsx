@@ -25,6 +25,10 @@ export const ProductCard = ({ product, onViewDetails }: ProductCardProps) => {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!product.inStock) {
+      toast({ title: t('products.out_of_stock'), description: `${product.name} ${t('products.out_of_stock')}`, variant: 'destructive' });
+      return;
+    }
     addItem(product, selectedPrice.weight, selectedPrice.price);
     toast({
       title: t('products.added_to_cart'),
