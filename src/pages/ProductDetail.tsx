@@ -85,6 +85,10 @@ const ProductDetail = () => {
   const relatedProducts = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
 
   const handleAddToCart = () => {
+    if (!product.inStock) {
+      toast({ title: t('products.out_of_stock'), description: t('products.out_of_stock'), variant: 'destructive' });
+      return;
+    }
     for (let i = 0; i < quantity; i++) addItem(product, selectedPrice.weight, selectedPrice.price);
     toast({ title: t('products.added_to_cart'), description: `${quantity}x ${product.name} (${selectedPrice.weight})` });
   };
