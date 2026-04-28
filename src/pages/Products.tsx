@@ -10,11 +10,17 @@ import { useProducts } from '@/hooks/useProducts';
 
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(searchParams.get('category'));
+  const categoryParam = searchParams.get('category');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryParam);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const { t } = useLanguage();
   const { data: products = [], isLoading } = useProducts();
+
+  // Sync local state when the URL ?category= changes (e.g. clicking "Fresh Catch" while on /products)
+  useEffect(() => {
+    setSelectedCategory(categoryParam);
+  }, [categoryParam]);
 
   useEffect(() => {
     let result = selectedCategory ? products.filter((p) => p.category === selectedCategory) : products;
