@@ -5,13 +5,14 @@ import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { products } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { ProductGrid } from '@/components/products/ProductGrid';
+import { Loader2 } from 'lucide-react';
 
 interface Review {
   id: string;
