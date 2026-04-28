@@ -24,7 +24,6 @@ export const Header = () => {
   const navLinks = [
     { name: t('nav.home'), path: '/' },
     { name: t('nav.products'), path: '/products' },
-    { name: t('nav.fresh_catch'), path: '/products?category=fresh-fish' },
     { name: t('nav.contact'), path: '/contact' },
   ];
 
