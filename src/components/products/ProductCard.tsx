@@ -51,11 +51,13 @@ export const ProductCard = ({ product, onViewDetails }: ProductCardProps) => {
           {product.category === 'special-offers' && <Badge variant="offer" className="shadow-md">🔥 Special Offer</Badge>}
           {product.category === 'ready-to-cook' && <Badge variant="category" className="shadow-md">🍳 Ready to Cook</Badge>}
         </div>
-        <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button variant="cta" size="icon" onClick={handleAddToCart} className="rounded-full shadow-lg">
-            <ShoppingCart className="h-5 w-5" />
-          </Button>
-        </div>
+        {product.inStock && (
+          <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button variant="cta" size="icon" onClick={handleAddToCart} className="rounded-full shadow-lg">
+              <ShoppingCart className="h-5 w-5" />
+            </Button>
+          </div>
+        )}
         {!product.inStock && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
             <Badge variant="outOfStock" className="text-sm">{t('products.out_of_stock')}</Badge>
