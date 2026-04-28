@@ -30,7 +30,11 @@ const ProductDetail = () => {
   const { user } = useAuth();
   const { t, language } = useLanguage();
 
-  const product = products.find((p) => p.id === id);
+  const { products, product, isLoading } = (() => {
+    const r = useProducts();
+    const list = r.data || [];
+    return { products: list, product: list.find((p) => p.id === id), isLoading: r.isLoading };
+  })();
   const [selectedPriceIndex, setSelectedPriceIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
