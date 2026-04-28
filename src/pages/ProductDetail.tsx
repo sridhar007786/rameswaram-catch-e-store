@@ -197,16 +197,22 @@ const ProductDetail = () => {
                 <span className="text-4xl font-bold text-foreground">₹{selectedPrice.price}</span>
                 {selectedPrice.originalPrice && <span className="text-xl text-muted-foreground line-through">₹{selectedPrice.originalPrice}</span>}
                 {discount > 0 && <Badge variant="offer" className="text-sm">{t('detail.save_off')} {discount}%</Badge>}
+                {product.inStock ? (
+                  <Badge variant="fresh" className="text-sm">✓ {t('products.in_stock') || 'In Stock'}</Badge>
+                ) : (
+                  <Badge variant="outOfStock" className="text-sm">{t('products.out_of_stock')}</Badge>
+                )}
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-center gap-3 bg-muted rounded-xl px-4 py-2">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors"><Minus className="h-4 w-4" /></button>
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={!product.inStock} className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors disabled:opacity-50"><Minus className="h-4 w-4" /></button>
                   <span className="w-8 text-center font-bold text-lg">{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)} className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors"><Plus className="h-4 w-4" /></button>
+                  <button onClick={() => setQuantity(quantity + 1)} disabled={!product.inStock} className="w-8 h-8 rounded-full bg-card flex items-center justify-center hover:bg-background transition-colors disabled:opacity-50"><Plus className="h-4 w-4" /></button>
                 </div>
                 <Button variant="cta" size="xl" className="flex-1 gap-2" onClick={handleAddToCart} disabled={!product.inStock}>
-                  <ShoppingCart className="h-5 w-5" />{t('detail.add_to_cart')} — ₹{selectedPrice.price * quantity}
+                  <ShoppingCart className="h-5 w-5" />
+                  {product.inStock ? `${t('detail.add_to_cart')} — ₹${selectedPrice.price * quantity}` : t('products.out_of_stock')}
                 </Button>
                 <Button variant="outline" size="icon" className="shrink-0 h-14 w-14"><Heart className="h-5 w-5" /></Button>
               </div>
