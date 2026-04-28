@@ -2,11 +2,12 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProductGrid } from '@/components/products/ProductGrid';
-import { getPopularProducts } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import { useLanguage } from '@/context/LanguageContext';
 
 export const FeaturedProducts = () => {
-  const popularProducts = getPopularProducts();
+  const { data: products = [] } = useProducts();
+  const popularProducts = products.filter((p) => p.isPopular).slice(0, 8);
   const { t } = useLanguage();
 
   return (
