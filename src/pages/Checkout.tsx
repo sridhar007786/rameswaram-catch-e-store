@@ -119,6 +119,34 @@ const CheckoutPage = () => {
       toast({ title: t('common.error'), description: t('checkout.fill_fields'), variant: 'destructive' });
       return;
     }
+
+    // Validate stock against the database for every item before placing order
+    const productIds = Array.from(new Set(state.items.map((i) => i.product.id)));
+    const { data: stockRows, error: stockErr } = await supabase
+      .from('products')
+      .select('id, name, in_stock, stock_quantity')
+      .in('id', productIds);
+    if (stockErr) {
+      toast({ title: t('common.error'), description: 'Could not verify stock. Please try again.', variant: 'destructive' });
+      return;
+    }
+    const stockMap = new Map((stockRows || []).map((r: any) => [String(r.id), r]));
+    const unavailable: string[] = [];
+    for (const item of state.items) {
+      const row = stockMap.get(item.product.id);
+      if (!row || row.in_stock !== true || (typeof row.stock_quantity === 'number' && row.stock_quantity < item.quantity)) {
+        unavailable.push(item.product.name);
+      }
+    }
+    if (unavailable.length > 0) {
+      toast({
+        title: 'Out of Stock',
+        description: `Sorry, the following items are no longer available: ${unavailable.join(', ')}. Please remove them from your cart.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (paymentMethod === 'whatsapp') {
       const msg = `🛒 New Order from ${form.name}\n\n${state.items.map((i) => `• ${i.product.name} (${i.selectedWeight}) x${i.quantity} — ₹${i.price * i.quantity}`).join('\n')}\n\nSubtotal: ₹${state.total}\nDelivery: ₹${deliveryCharge}\nTotal: ₹${grandTotal}\n\n📍 Address: ${form.address}, ${form.city} - ${form.pincode}\n📞 Phone: ${form.phone}${form.notes ? `\n📝 Notes: ${form.notes}` : ''}`;
       window.open(`https://wa.me/919876543210?text=${encodeURIComponent(msg)}`, '_blank');
